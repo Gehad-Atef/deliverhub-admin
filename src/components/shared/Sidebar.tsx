@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useUI } from "../../hooks/useUI";
+import { useTranslation } from "react-i18next";
 
 const navItems = [
   {
     path: "/dashboard",
-    label: "Dashboard",
+    key: "dashboard",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +26,7 @@ const navItems = [
   },
   {
     path: "/drivers",
-    label: "Drivers",
+    key: "drivers",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -44,7 +46,7 @@ const navItems = [
   },
   {
     path: "/shipments",
-    label: "Shipments",
+    key: "shipments",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -64,7 +66,7 @@ const navItems = [
   },
   {
     path: "/revenue",
-    label: "Revenue",
+    key: "revenue",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +86,7 @@ const navItems = [
   },
   {
     path: "/escrow",
-    label: "Escrow",
+    key: "escrow",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -106,11 +108,16 @@ const navItems = [
 
 const Sidebar = () => {
   const { admin, logout } = useAuth();
+  const { language } = useUI();
+  const { t } = useTranslation();
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col fixed left-0 top-0">
+    <aside
+      className="w-64 h-screen bg-[var(--bg-sidebar)] border-e border-[var(--border-color)] 
+      flex flex-col fixed start-0 top-0 z-40"
+    >
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-gray-100">
+      <div className="px-6 py-5 border-b border-[var(--border-color)]">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <svg
@@ -128,7 +135,9 @@ const Sidebar = () => {
               />
             </svg>
           </div>
-          <span className="font-bold text-gray-900">DeliverHub</span>
+          <span className="font-bold text-[var(--text-primary)]">
+            DeliverHub
+          </span>
         </div>
       </div>
 
@@ -142,31 +151,31 @@ const Sidebar = () => {
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition
               ${
                 isActive
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
               }`
             }
           >
             {item.icon}
-            {item.label}
+            {t(`sidebar.${item.key}`)}
           </NavLink>
         ))}
       </nav>
 
       {/* Admin Info */}
-      <div className="px-4 py-4 border-t border-gray-100">
+      <div className="px-4 py-4 border-t border-[var(--border-color)]">
         <div className="flex items-center gap-3 mb-3">
           <div
-            className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center
-            text-blue-700 font-semibold text-sm"
+            className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center 
+            justify-center text-blue-700 dark:text-blue-400 font-semibold text-sm"
           >
             {admin?.name?.charAt(0) ?? "A"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
+            <p className="text-sm font-medium text-[var(--text-primary)] truncate">
               {admin?.name ?? "Admin"}
             </p>
-            <p className="text-xs text-gray-400 truncate">
+            <p className="text-xs text-[var(--text-muted)] truncate">
               {admin?.email ?? ""}
             </p>
           </div>
@@ -174,7 +183,7 @@ const Sidebar = () => {
         <button
           onClick={logout}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm
-            text-red-500 hover:bg-red-50 transition font-medium"
+            text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition font-medium"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -190,7 +199,7 @@ const Sidebar = () => {
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
             />
           </svg>
-          Logout
+          {t("sidebar.logout")}
         </button>
       </div>
     </aside>
