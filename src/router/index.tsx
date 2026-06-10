@@ -1,7 +1,10 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import ProtectedRoute from "../components/shared/ProtectedRoute";
+import AdminLayout from "../components/shared/AdminLayout";
+
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
-import ProtectedRoute from "../components/shared/ProtectedRoute";
+import DriversPage from "../pages/drivers/Drivers";
 
 export const router = createBrowserRouter([
   {
@@ -17,8 +20,17 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: "dashboard",
-        element: <Dashboard />,
+        element: <AdminLayout />,
+        children: [
+          {
+            path: "dashboard",
+            element: <Dashboard />,
+          },
+          {
+            path: "drivers",
+            element: <DriversPage />,
+          },
+        ],
       },
     ],
   },
