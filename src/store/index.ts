@@ -4,6 +4,8 @@ import driversReducer from "./slices/driversSlice";
 import shipmentsReducer from "./slices/shipmentsSlice";
 import uiReducer from "./slices/uiSlice";
 import dashboardReducer from "./slices/dashboardSlice";
+import usersReducer from "./slices/usersSlice";
+import officesReducer from "./slices/officesSlice";
 import {
     useDispatch,
     useSelector,
@@ -17,6 +19,8 @@ export const store = configureStore({
         shipments: shipmentsReducer,
         ui: uiReducer,
         dashboard: dashboardReducer,
+        users: usersReducer,
+        offices: officesReducer,
     },
 });
 

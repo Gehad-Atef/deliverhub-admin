@@ -6,38 +6,43 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import DriversPage from "../pages/drivers/Drivers";
 import ShipmentsPage from "../pages/shipments/Shipments";
+import Users from "../pages/users/Users";
+import Offices from "../pages/offices/Offices";
 
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Navigate to="/login" replace />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/",
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <AdminLayout />,
+    {
+        path: "/",
+        element: <Navigate to="/login" replace />,
+    },
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    {
+        path: "/",
+        element: <ProtectedRoute />,
         children: [
-          {
-            path: "dashboard",
-            element: <Dashboard />,
-          },
-          {
-            path: "drivers",
-            element: <DriversPage />,
-          },
+            {
+                element: <AdminLayout />,
+                children: [
+                    {
+                        path: "dashboard",
+                        element: <Dashboard />,
+                    },
+                    { path: "/users", element: <Users /> },
 
-          {
-            path: "shipments",
-            element: <ShipmentsPage />,
-          },
+                    {
+                        path: "drivers",
+                        element: <DriversPage />,
+                    },
+
+                    {
+                        path: "shipments",
+                        element: <ShipmentsPage />,
+                    },
+                    { path: "offices", element: <Offices /> },
+                ],
+            },
         ],
-      },
-    ],
-  },
+    },
 ]);
