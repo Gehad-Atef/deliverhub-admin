@@ -6,6 +6,7 @@ interface PasswordInputProps {
   placeholder?: string;
   disabled?: boolean;
   error?: string;
+  isDark?: boolean;
 }
 
 const PasswordInput = ({
@@ -14,16 +15,19 @@ const PasswordInput = ({
   placeholder = "Enter password",
   disabled,
   error,
+  isDark = true,
 }: PasswordInputProps) => {
   const [show, setShow] = useState(false);
 
   return (
     <div className="flex flex-col gap-1">
       <div className="relative">
-        {/* Lock icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]"
+          className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors"
+          style={{
+            color: isDark ? "rgba(255,255,255,0.3)" : "rgba(15,23,42,0.3)",
+          }}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -42,25 +46,50 @@ const PasswordInput = ({
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
-          className={`w-full pl-10 pr-11 py-2.5 rounded-lg border text-sm outline-none transition
-            bg-[var(--bg-primary)] text-[var(--text-primary)]
-            placeholder:text-[var(--text-muted)]
-            focus:ring-2 focus:ring-blue-500/20
-            ${
-              error
-                ? "border-red-400 focus:border-red-500"
-                : "border-[var(--border-color)] focus:border-blue-500"
-            }
+          className={`w-full pl-10 pr-11 py-2.5 rounded-lg text-sm outline-none transition-all
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           `}
+          style={{
+            background: isDark
+              ? "rgba(255,255,255,0.08)"
+              : "rgba(255,255,255,0.7)",
+            border: error
+              ? "1px solid rgba(239,68,68,0.6)"
+              : isDark
+                ? "1px solid rgba(255,255,255,0.12)"
+                : "1px solid rgba(0,0,0,0.1)",
+            color: isDark ? "white" : "#0f172a",
+          }}
+          onFocus={(e) => {
+            if (!error)
+              e.currentTarget.style.border = "1px solid rgba(59,130,246,0.7)";
+          }}
+          onBlur={(e) => {
+            if (!error)
+              e.currentTarget.style.border = isDark
+                ? "1px solid rgba(255,255,255,0.12)"
+                : "1px solid rgba(0,0,0,0.1)";
+          }}
         />
 
         <button
           type="button"
           onClick={() => setShow(!show)}
           disabled={disabled}
-          className="absolute right-3 top-1/2 -translate-y-1/2 transition
-            text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+          className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+          style={{
+            color: isDark ? "rgba(255,255,255,0.35)" : "rgba(15,23,42,0.35)",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.color = isDark
+              ? "rgba(255,255,255,0.75)"
+              : "rgba(15,23,42,0.75)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.color = isDark
+              ? "rgba(255,255,255,0.35)"
+              : "rgba(15,23,42,0.35)")
+          }
         >
           {show ? (
             <svg
@@ -101,7 +130,7 @@ const PasswordInput = ({
           )}
         </button>
       </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 };

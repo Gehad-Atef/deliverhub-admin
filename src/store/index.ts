@@ -2,22 +2,24 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import driversReducer from "./slices/driversSlice";
 import shipmentsReducer from "./slices/shipmentsSlice";
+import revenueReducer from "./slices/revenueSlice";
 import uiReducer from "./slices/uiSlice";
 import dashboardReducer from "./slices/dashboardSlice";
 import {
-    useDispatch,
-    useSelector,
-    type TypedUseSelectorHook,
+  useDispatch,
+  useSelector,
+  type TypedUseSelectorHook,
 } from "react-redux";
 
 export const store = configureStore({
-    reducer: {
-        auth: authReducer,
-        drivers: driversReducer,
-        shipments: shipmentsReducer,
-        ui: uiReducer,
-        dashboard: dashboardReducer,
-    },
+  reducer: {
+    auth: authReducer,
+    drivers: driversReducer,
+    shipments: shipmentsReducer,
+    revenue: revenueReducer,
+    dashboard: dashboardReducer,
+    ui: uiReducer,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
