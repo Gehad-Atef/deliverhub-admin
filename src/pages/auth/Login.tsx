@@ -54,95 +54,91 @@ const Login = () => {
     if (validate()) login(form);
   };
 
+  const isDark = theme === "dark";
+
   return (
-    <div className="min-h-screen flex bg-[var(--bg-primary)]">
-      {/* ===== Left side — Image ===== */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Photo */}
-        <img
-          src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=80"
-          alt="Delivery logistics"
-          className="absolute inset-0 w-full h-full object-cover"
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: isDark
+          ? "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
+          : "linear-gradient(135deg, #e0e7ff 0%, #f0f9ff 50%, #fce7f3 100%)",
+      }}
+    >
+      {/* Subtle bg blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl opacity-40"
+          style={{
+            background: isDark
+              ? "rgba(99,102,241,0.2)"
+              : "rgba(99,102,241,0.15)",
+          }}
         />
-
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/80 via-slate-900/70 to-indigo-900/80" />
-
-        {/* Content on top of image */}
-        <div className="relative z-10 flex flex-col justify-between p-10 w-full">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg, #2563eb, #4f46e5)",
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12h12l1-12"
-                />
-              </svg>
-            </div>
-            <span className="text-white font-bold text-lg">DeliverHub</span>
-          </div>
-
-          {/* Bottom text */}
-          <div>
-            <h2 className="text-3xl font-bold text-white leading-snug mb-3">
-              {t("auth.heroTitle", "Manage your deliveries smarter")}
-            </h2>
-            <p className="text-white/60 text-sm leading-relaxed mb-8">
-              {t(
-                "auth.heroSub",
-                "Full control over orders, drivers, and routes — all in one dashboard.",
-              )}
-            </p>
-
-            {/* Stats row */}
-            <div className="flex items-center gap-6">
-              {[
-                { value: "12k+", label: t("auth.statOrders", "Orders/day") },
-                { value: "98%", label: t("auth.statRate", "Delivery rate") },
-                {
-                  value: "340+",
-                  label: t("auth.statDrivers", "Active drivers"),
-                },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <div className="text-white font-bold text-xl">
-                    {stat.value}
-                  </div>
-                  <div className="text-white/50 text-xs mt-0.5">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <div
+          className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-40"
+          style={{
+            background: isDark
+              ? "rgba(59,130,246,0.2)"
+              : "rgba(236,72,153,0.12)",
+          }}
+        />
       </div>
 
-      {/* ===== Right side — Form ===== */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 relative">
-        {/* Controls */}
-        <div className="absolute top-4 end-4 flex items-center gap-2 z-10">
-          <button
-            onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-            className="w-9 h-9 rounded-lg flex items-center justify-center transition relative
-              bg-[var(--bg-secondary)] border border-[var(--border-color)]
-              text-[var(--text-secondary)] hover:text-[var(--text-primary)]
-              hover:border-blue-400 dark:hover:border-blue-500"
+      {/* Controls */}
+      <div className="fixed top-4 end-4 flex items-center gap-2 z-20">
+        <button
+          onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+          className="w-9 h-9 rounded-lg flex items-center justify-center transition-all relative"
+          style={{
+            background: isDark
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(255,255,255,0.7)",
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.15)"
+              : "1px solid rgba(0,0,0,0.1)",
+            color: isDark ? "rgba(255,255,255,0.7)" : "rgba(30,41,59,0.8)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 
+              3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+            />
+          </svg>
+          <span
+            className="absolute -top-1 -end-1 w-4 h-4 bg-blue-500 rounded-full text-white
+            text-[9px] font-bold flex items-center justify-center"
+          >
+            {language === "en" ? "ع" : "E"}
+          </span>
+        </button>
+
+        <button
+          onClick={toggleTheme}
+          className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
+          style={{
+            background: isDark
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(255,255,255,0.7)",
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.15)"
+              : "1px solid rgba(0,0,0,0.1)",
+            color: isDark ? "rgba(255,255,255,0.7)" : "rgba(30,41,59,0.8)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          {isDark ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-4 h-4"
@@ -154,96 +150,89 @@ const Login = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 
-                3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"
               />
             </svg>
-            <span
-              className="absolute -top-1 -end-1 w-4 h-4 bg-blue-600 rounded-full text-white
-              text-[9px] font-bold flex items-center justify-center"
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              {language === "en" ? "ع" : "E"}
-            </span>
-          </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
 
-          <button
-            onClick={toggleTheme}
-            className="w-9 h-9 rounded-lg flex items-center justify-center transition
-              bg-[var(--bg-secondary)] border border-[var(--border-color)]
-              text-[var(--text-secondary)] hover:text-[var(--text-primary)]
-              hover:border-blue-400 dark:hover:border-blue-500"
-          >
-            {theme === "light" ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Form container */}
-        <div className="w-full max-w-sm">
-          {/* Logo — mobile only */}
-          <div className="text-center mb-8 lg:hidden">
-            <div
-              className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
-              style={{
-                background: "linear-gradient(135deg, #2563eb, #4f46e5)",
-                boxShadow: "0 0 0 6px rgba(37,99,235,0.12)",
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-7 h-7 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12h12l1-12"
-                />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-              DeliverHub
-            </h1>
-          </div>
-
-          {/* Heading */}
+      {/* Split Card */}
+      <div
+        className="relative z-10 w-full max-w-3xl flex rounded-2xl overflow-hidden shadow-2xl"
+        style={{
+          minHeight: "480px",
+          boxShadow: isDark
+            ? "0 25px 60px rgba(0,0,0,0.5)"
+            : "0 25px 60px rgba(0,0,0,0.15)",
+        }}
+      >
+        {/* ===== Left — Form ===== */}
+        <div
+          className="w-full md:w-1/2 flex flex-col justify-center p-10 transition-colors duration-500"
+          style={{
+            background: isDark ? "#1e293b" : "#ffffff",
+          }}
+        >
+          {/* Logo */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{
+                  background: "linear-gradient(135deg, #2563eb, #4f46e5)",
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12h12l1-12"
+                  />
+                </svg>
+              </div>
+              <span
+                className="text-lg font-bold"
+                style={{ color: isDark ? "white" : "#0f172a" }}
+              >
+                DeliverHub
+              </span>
+            </div>
+
+            <h2
+              className="text-2xl font-bold mb-1"
+              style={{ color: isDark ? "white" : "#0f172a" }}
+            >
               {t("auth.signIn")}
             </h2>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p
+              className="text-sm"
+              style={{
+                color: isDark ? "rgba(255,255,255,0.45)" : "rgba(15,23,42,0.5)",
+              }}
+            >
               {t("auth.adminDashboard")}
             </p>
           </div>
@@ -251,10 +240,14 @@ const Login = () => {
           {/* API Error */}
           {error && (
             <div
-              className="mb-4 px-4 py-3 rounded-lg flex items-center gap-2 text-sm
-              bg-red-50 dark:bg-red-950/30
-              border border-red-200 dark:border-red-900
-              text-red-600 dark:text-red-400"
+              className="mb-4 px-4 py-3 rounded-lg flex items-center gap-2 text-sm"
+              style={{
+                background: isDark
+                  ? "rgba(239,68,68,0.15)"
+                  : "rgba(239,68,68,0.08)",
+                border: "1px solid rgba(239,68,68,0.3)",
+                color: isDark ? "#fca5a5" : "#dc2626",
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -277,13 +270,25 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              <label
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{
+                  color: isDark
+                    ? "rgba(255,255,255,0.45)"
+                    : "rgba(15,23,42,0.45)",
+                }}
+              >
                 {t("auth.email")}
               </label>
               <div className="relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]"
+                  className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{
+                    color: isDark
+                      ? "rgba(255,255,255,0.25)"
+                      : "rgba(15,23,42,0.25)",
+                  }}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -305,27 +310,48 @@ const Login = () => {
                   }}
                   placeholder="admin@deliverhub.com"
                   disabled={isLoading}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm outline-none transition
-                    bg-[var(--bg-secondary)] text-[var(--text-primary)]
-                    placeholder:text-[var(--text-muted)]
-                    focus:ring-2 focus:ring-blue-500/20
-                    ${
-                      validationErrors.email
-                        ? "border-red-400 focus:border-red-500"
-                        : "border-[var(--border-color)] focus:border-blue-500"
-                    }
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none transition-all
                     ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
                   `}
+                  style={{
+                    background: isDark
+                      ? "rgba(255,255,255,0.06)"
+                      : "rgba(15,23,42,0.04)",
+                    border: validationErrors.email
+                      ? "1px solid rgba(239,68,68,0.6)"
+                      : isDark
+                        ? "1px solid rgba(255,255,255,0.1)"
+                        : "1px solid rgba(15,23,42,0.12)",
+                    color: isDark ? "white" : "#0f172a",
+                  }}
+                  onFocus={(e) => {
+                    if (!validationErrors.email)
+                      e.currentTarget.style.border =
+                        "1px solid rgba(59,130,246,0.7)";
+                  }}
+                  onBlur={(e) => {
+                    if (!validationErrors.email)
+                      e.currentTarget.style.border = isDark
+                        ? "1px solid rgba(255,255,255,0.1)"
+                        : "1px solid rgba(15,23,42,0.12)";
+                  }}
                 />
               </div>
               {validationErrors.email && (
-                <p className="text-xs text-red-500">{validationErrors.email}</p>
+                <p className="text-xs text-red-400">{validationErrors.email}</p>
               )}
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              <label
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{
+                  color: isDark
+                    ? "rgba(255,255,255,0.45)"
+                    : "rgba(15,23,42,0.45)",
+                }}
+              >
                 {t("auth.password")}
               </label>
               <PasswordInput
@@ -338,6 +364,7 @@ const Login = () => {
                 placeholder="••••••••"
                 disabled={isLoading}
                 error={validationErrors.password}
+                isDark={isDark}
               />
             </div>
 
@@ -383,9 +410,78 @@ const Login = () => {
             </button>
           </form>
 
-          <p className="text-center text-xs text-[var(--text-muted)] mt-8">
+          <p
+            className="text-center text-xs mt-6"
+            style={{
+              color: isDark ? "rgba(255,255,255,0.2)" : "rgba(15,23,42,0.3)",
+            }}
+          >
             {t("auth.copyright")} © {new Date().getFullYear()}
           </p>
+        </div>
+
+        {/* ===== Right — Image + Branding ===== */}
+        <div className="hidden md:flex md:w-1/2 relative overflow-hidden flex-col justify-between">
+          {/* Photo */}
+          <img
+            src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=900&q=80"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+
+          {/* Overlay */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(160deg, rgba(37,99,235,0.75) 0%, rgba(67,56,202,0.85) 100%)",
+            }}
+          />
+
+          {/* Content */}
+          <div className="relative z-10 flex flex-col justify-between h-full p-10">
+            {/* Top badge */}
+            <div
+              className="self-start px-3 py-1.5 rounded-full text-xs font-semibold text-white"
+              style={{
+                background: "rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.2)",
+              }}
+            >
+              Admin Portal
+            </div>
+
+            {/* Bottom content */}
+            <div>
+              <h3 className="text-2xl font-bold text-white leading-snug mb-3">
+                {t("auth.heroTitle", "Manage your deliveries smarter")}
+              </h3>
+              <p className="text-sm text-white/60 leading-relaxed mb-8">
+                {t(
+                  "auth.heroSub",
+                  "Full control over orders, drivers, and routes.",
+                )}
+              </p>
+
+              {/* Stats */}
+              <div className="flex gap-6">
+                {[
+                  { value: "12k+", label: t("auth.statOrders", "Orders/day") },
+                  { value: "98%", label: t("auth.statRate", "On-time rate") },
+                  { value: "340+", label: t("auth.statDrivers", "Drivers") },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <div className="text-white font-bold text-lg">
+                      {s.value}
+                    </div>
+                    <div className="text-white/50 text-xs mt-0.5">
+                      {s.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

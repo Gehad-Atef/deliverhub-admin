@@ -6,6 +6,7 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import DriversPage from "../pages/drivers/Drivers";
 import ShipmentsPage from "../pages/shipments/Shipments";
+import RevenuePage from "../pages/revenue/Revenue";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +36,11 @@ export const router = createBrowserRouter([
           {
             path: "shipments",
             element: <ShipmentsPage />,
+          },
+
+          {
+            path: "revenue",
+            element: <RevenuePage />,
           },
         ],
       },

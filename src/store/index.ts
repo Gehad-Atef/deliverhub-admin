@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import driversReducer from "./slices/driversSlice";
 import shipmentsReducer from "./slices/shipmentsSlice";
+import revenueReducer from "./slices/revenueSlice";
 import uiReducer from "./slices/uiSlice";
 
 export const store = configureStore({
@@ -9,6 +10,7 @@ export const store = configureStore({
     auth: authReducer,
     drivers: driversReducer,
     shipments: shipmentsReducer,
+    revenue: revenueReducer,
     ui: uiReducer,
   },
 });
