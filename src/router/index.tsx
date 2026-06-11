@@ -8,6 +8,7 @@ import DriversPage from "../pages/drivers/Drivers";
 import ShipmentsPage from "../pages/shipments/Shipments";
 import Users from "../pages/users/Users";
 import Offices from "../pages/offices/Offices";
+import RevenuePage from "../pages/revenue/Revenue";
 
 export const router = createBrowserRouter([
     {
@@ -29,7 +30,7 @@ export const router = createBrowserRouter([
                         path: "dashboard",
                         element: <Dashboard />,
                     },
-                    { path: "/users", element: <Users /> },
+                    { path: "users", element: <Users /> },
 
                     {
                         path: "drivers",
@@ -42,6 +43,11 @@ export const router = createBrowserRouter([
                     },
                     { path: "offices", element: <Offices /> },
                 ],
+            },
+
+            {
+                path: "revenue",
+                element: <RevenuePage />,
             },
         ],
     },
