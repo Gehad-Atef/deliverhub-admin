@@ -1,0 +1,42 @@
+export interface Shipment {
+  id: string;
+  trackingNumber: string;
+  customer: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+  driver?: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+  pickup: {
+    address: string;
+    city: string;
+  };
+  delivery: {
+    address: string;
+    city: string;
+  };
+  status:
+    | "pending"
+    | "assigned"
+    | "picked_up"
+    | "in_transit"
+    | "delivered"
+    | "cancelled";
+  price: number;
+  commission: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ShipmentsState {
+  shipments: Shipment[];
+  isLoading: boolean;
+  error: string | null;
+  total: number;
+  page: number;
+  limit: number;
+}

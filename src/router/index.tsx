@@ -5,6 +5,7 @@ import AdminLayout from "../components/shared/AdminLayout";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import DriversPage from "../pages/drivers/Drivers";
+import ShipmentsPage from "../pages/shipments/Shipments";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,11 @@ export const router = createBrowserRouter([
           {
             path: "drivers",
             element: <DriversPage />,
+          },
+
+          {
+            path: "shipments",
+            element: <ShipmentsPage />,
           },
         ],
       },
