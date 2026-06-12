@@ -6,6 +6,9 @@ import revenueReducer from "./slices/revenueSlice";
 import escrowReducer from "./slices/escrowSlice";
 import uiReducer from "./slices/uiSlice";
 import dashboardReducer from "./slices/dashboardSlice";
+import usersReducer from "./slices/usersSlice";
+import officesReducer from "./slices/officesSlice";
+import disputesReducer from "./slices/disputesSlice";
 import {
   useDispatch,
   useSelector,
@@ -21,6 +24,16 @@ export const store = configureStore({
     escrow: escrowReducer,
     dashboard: dashboardReducer,
     ui: uiReducer,
+  },
+  reducer: {
+    auth: authReducer,
+    drivers: driversReducer,
+    shipments: shipmentsReducer,
+    ui: uiReducer,
+    dashboard: dashboardReducer,
+    users: usersReducer,
+    offices: officesReducer,
+    disputes: disputesReducer,
   },
 });
 
