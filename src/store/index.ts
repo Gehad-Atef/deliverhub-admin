@@ -2,11 +2,12 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import driversReducer from "./slices/driversSlice";
 import shipmentsReducer from "./slices/shipmentsSlice";
-import revenueReducer from "./slices/revenueSlice";
+// import revenueReducer from "./slices/revenueSlice";
 import uiReducer from "./slices/uiSlice";
 import dashboardReducer from "./slices/dashboardSlice";
 import usersReducer from "./slices/usersSlice";
 import officesReducer from "./slices/officesSlice";
+import disputesReducer from "./slices/disputesSlice";
 import {
     useDispatch,
     useSelector,
@@ -22,6 +23,7 @@ export const store = configureStore({
         dashboard: dashboardReducer,
         users: usersReducer,
         offices: officesReducer,
+        disputes: disputesReducer,
     },
 });
 

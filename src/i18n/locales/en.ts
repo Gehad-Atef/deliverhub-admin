@@ -53,6 +53,8 @@ export default {
         offices: "Offices",
         revenue: "Revenue",
         escrow: "Escrow",
+        disputes: "Disputes",
+        settings: "Settings",
         logout: "Logout",
     },
     emailRequired: "Email is required",

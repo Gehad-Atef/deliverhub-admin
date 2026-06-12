@@ -9,6 +9,8 @@ import ShipmentsPage from "../pages/shipments/Shipments";
 import Users from "../pages/users/Users";
 import Offices from "../pages/offices/Offices";
 import RevenuePage from "../pages/revenue/Revenue";
+import Disputes from "../pages/disputes/Disputes";
+import Settings from "../pages/settings/Settings";
 
 export const router = createBrowserRouter([
     {
@@ -42,6 +44,8 @@ export const router = createBrowserRouter([
                         element: <ShipmentsPage />,
                     },
                     { path: "offices", element: <Offices /> },
+                    { path: "disputes", element: <Disputes /> },
+                    { path: "settings", element: <Settings /> },
                 ],
             },
 
