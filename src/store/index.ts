@@ -23,17 +23,10 @@ export const store = configureStore({
     revenue: revenueReducer,
     escrow: escrowReducer,
     dashboard: dashboardReducer,
-    ui: uiReducer,
-  },
-  reducer: {
-    auth: authReducer,
-    drivers: driversReducer,
-    shipments: shipmentsReducer,
-    ui: uiReducer,
-    dashboard: dashboardReducer,
     users: usersReducer,
     offices: officesReducer,
     disputes: disputesReducer,
+    ui: uiReducer,
   },
 });
 

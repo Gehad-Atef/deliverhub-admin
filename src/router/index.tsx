@@ -14,48 +14,39 @@ import Settings from "../pages/settings/Settings";
 import EscrowPage from "../pages/escrow/Escrow";
 
 export const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <Navigate to="/login" replace />,
-    },
-    {
-        path: "/login",
-        element: <Login />,
-    },
-    {
-        path: "/",
-        element: <ProtectedRoute />,
+  {
+    path: "/",
+    element: <Navigate to="/login" replace />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/",
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <AdminLayout />,
         children: [
-            {
-                element: <AdminLayout />,
-                children: [
-                    {
-                        path: "dashboard",
-                        element: <Dashboard />,
-                    },
-                    { path: "users", element: <Users /> },
+          {
+            path: "dashboard",
+            element: <Dashboard />,
+          },
+          { path: "users", element: <Users /> },
 
-                    {
-                        path: "drivers",
-                        element: <DriversPage />,
-                    },
+          {
+            path: "drivers",
+            element: <DriversPage />,
+          },
 
-                    {
-                        path: "shipments",
-                        element: <ShipmentsPage />,
-                    },
-                    { path: "offices", element: <Offices /> },
-                    { path: "disputes", element: <Disputes /> },
-                    { path: "settings", element: <Settings /> },
-                ],
-            },
-
-            {
-                path: "revenue",
-                element: <RevenuePage />,
-            },
-        ],
-    },
+          {
+            path: "shipments",
+            element: <ShipmentsPage />,
+          },
+          { path: "offices", element: <Offices /> },
+          { path: "disputes", element: <Disputes /> },
+          { path: "settings", element: <Settings /> },
           {
             path: "revenue",
             element: <RevenuePage />,
