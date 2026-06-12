@@ -7,6 +7,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import DriversPage from "../pages/drivers/Drivers";
 import ShipmentsPage from "../pages/shipments/Shipments";
 import RevenuePage from "../pages/revenue/Revenue";
+import EscrowPage from "../pages/escrow/Escrow";
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +42,11 @@ export const router = createBrowserRouter([
           {
             path: "revenue",
             element: <RevenuePage />,
+          },
+
+          {
+            path: "escrow",
+            element: <EscrowPage />,
           },
         ],
       },

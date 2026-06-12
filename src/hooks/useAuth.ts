@@ -1,11 +1,12 @@
 import { useSelector, useDispatch } from "react-redux";
-
+import { useNavigate } from "react-router-dom";
 import { login, logout, clearError } from "../store/slices/authSlice";
-import type { LoginCredentials } from "../types/auth.ts";
+import type { LoginCredentials } from "../types/auth";
 import type { AppDispatch, RootState } from "../store";
 
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { admin, token, isAuthenticated, isLoading, error } = useSelector(
     (state: RootState) => state.auth,
   );
@@ -15,7 +16,9 @@ export const useAuth = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logout()).then(() => {
+      navigate("/login");
+    });
   };
 
   const handleClearError = () => {

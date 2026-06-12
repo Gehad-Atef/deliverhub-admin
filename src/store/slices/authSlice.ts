@@ -3,10 +3,13 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/auth.service";
 import type { AuthState, LoginCredentials } from "../../types/auth";
 
+const token = localStorage.getItem("token");
+const adminData = localStorage.getItem("admin");
+
 const initialState: AuthState = {
-  admin: null,
-  token: localStorage.getItem("token"),
-  isAuthenticated: !!localStorage.getItem("token"),
+  admin: adminData ? JSON.parse(adminData) : null,
+  token: token,
+  isAuthenticated: !!token,
   isLoading: false,
   error: null,
 };
@@ -24,7 +27,7 @@ export const login = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk("auth/logout", async () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("admin");
 });
 
 const authSlice = createSlice({
@@ -46,7 +49,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.admin = action.payload.admin;
         state.token = action.payload.token;
-        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("admin", JSON.stringify(action.payload.admin));
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
