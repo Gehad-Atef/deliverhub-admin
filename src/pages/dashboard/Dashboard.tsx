@@ -4,7 +4,6 @@ import { fetchDashboardData } from "../../store/slices/dashboardSlice";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
 import { Avatar } from "../../components/ui/Avatar";
-// import { Spinner } from "../../components/ui/Spinner";
 
 import type {
     RecentOrder,
@@ -12,8 +11,6 @@ import type {
     EscrowStatus,
     RecentUser,
 } from "../../types/dashboard";
-
-// ─── Helper maps ─────────────────────────────────────────────────────────────
 
 const orderStatusMap: Record<
     RecentOrder["status"],
@@ -41,14 +38,11 @@ const userRoleMap: Record<
     driver: "amber",
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-/** Horizontal bar row used in Revenue & Escrow cards */
 const BarRow: React.FC<{
     label: string;
-    fill: number; // 0-100
+    fill: number;
     valueText: string;
-    color: string; // CSS custom-property or hex
+    color: string;
 }> = ({ label, fill, valueText, color }) => (
     <div className="flex items-center gap-2">
         <span className="text-[11.5px] text-white/55 w-[90px] flex-shrink-0">
@@ -66,7 +60,6 @@ const BarRow: React.FC<{
     </div>
 );
 
-/** Single row inside Recent Orders card */
 const OrderRow: React.FC<{ order: RecentOrder }> = ({ order }) => {
     const { label, variant } = orderStatusMap[order.status];
     return (
@@ -84,7 +77,6 @@ const OrderRow: React.FC<{ order: RecentOrder }> = ({ order }) => {
     );
 };
 
-/** Single row inside Recent Users table */
 const UserRow: React.FC<{ user: RecentUser }> = ({ user }) => (
     <tr className="group">
         <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
@@ -101,10 +93,11 @@ const UserRow: React.FC<{ user: RecentUser }> = ({ user }) => (
                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
             </Badge>
         </td>
-        <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
+        {/* Orders & Joined hidden on small screens */}
+        <td className="hidden sm:table-cell px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
             {user.orders}
         </td>
-        <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
+        <td className="hidden md:table-cell px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
             {user.joined}
         </td>
         <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
@@ -115,8 +108,6 @@ const UserRow: React.FC<{ user: RecentUser }> = ({ user }) => (
     </tr>
 );
 
-// ─── Loading skeleton ─────────────────────────────────────────────────────────
-
 const SkeletonBlock: React.FC<{ className?: string }> = ({
     className = "",
 }) => (
@@ -125,23 +116,19 @@ const SkeletonBlock: React.FC<{ className?: string }> = ({
 
 const DashboardSkeleton: React.FC = () => (
     <div className="space-y-4">
-        {/* stat cards */}
-        <div className="grid grid-cols-4 gap-2.5">
+        {/* 4 cols on lg, 2 on sm, 1 on xs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {[...Array(4)].map((_, i) => (
                 <SkeletonBlock key={i} className="h-[100px]" />
             ))}
         </div>
-        {/* two-col row */}
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
             <SkeletonBlock className="h-[240px]" />
             <SkeletonBlock className="h-[240px]" />
         </div>
-        {/* table */}
         <SkeletonBlock className="h-[220px]" />
     </div>
 );
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -159,7 +146,6 @@ const Dashboard: React.FC = () => {
         dispatch(fetchDashboardData());
     }, [dispatch]);
 
-    // ── Error state ──
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-3 text-center">
@@ -167,10 +153,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-white/70 text-sm">{error}</p>
                 <button
                     onClick={() => dispatch(fetchDashboardData())}
-                    className="
-            mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500
-            text-white transition-colors duration-150
-          "
+                    className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors duration-150"
                 >
                     Retry
                 </button>
@@ -178,10 +161,8 @@ const Dashboard: React.FC = () => {
         );
     }
 
-    // ── Loading state ──
     if (loading || !stats) return <DashboardSkeleton />;
 
-    // ── Stat card definitions ──
     const statCards = [
         {
             label: "Total orders",
@@ -213,18 +194,17 @@ const Dashboard: React.FC = () => {
         },
     ];
 
-    // ── Render ──
     return (
         <div className="space-y-3">
-            {/* ── Stat cards ───────────────────────────────────────────────── */}
-            <div className="grid grid-cols-4 gap-2.5">
+            {/* ── Stat cards: 1 col → 2 col → 4 col ───────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 {statCards.map((card) => (
                     <StatCard key={card.label} {...card} />
                 ))}
             </div>
 
-            {/* ── Two-column row ────────────────────────────────────────────── */}
-            <div className="grid grid-cols-2 gap-2.5">
+            {/* ── Two-column row: stacked on mobile, side-by-side on lg+ ───── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
                 {/* Recent orders */}
                 <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] p-[1.1rem_1.15rem]">
                     <div className="flex items-center justify-between mb-4">
@@ -242,7 +222,6 @@ const Dashboard: React.FC = () => {
 
                 {/* Revenue by source + Escrow status */}
                 <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] p-[1.1rem_1.15rem] flex flex-col gap-5">
-                    {/* Revenue breakdown */}
                     <div>
                         <p className="font-['Syne',sans-serif] text-[13px] font-semibold text-white mb-3">
                             Revenue by source
@@ -260,10 +239,8 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Divider */}
                     <div className="h-px bg-white/[0.08]" />
 
-                    {/* Escrow breakdown */}
                     <div>
                         <p className="font-['Syne',sans-serif] text-[13px] font-semibold text-white mb-3">
                             Escrow status
@@ -285,7 +262,6 @@ const Dashboard: React.FC = () => {
 
             {/* ── Recent users table ────────────────────────────────────────── */}
             <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] overflow-hidden">
-                {/* Table header */}
                 <div className="flex items-center justify-between px-[1.1rem] py-[0.85rem] border-b border-white/[0.08]">
                     <span className="font-['Syne',sans-serif] text-[13px] font-semibold text-white">
                         Recent users
@@ -295,31 +271,40 @@ const Dashboard: React.FC = () => {
                     </button>
                 </div>
 
-                <table className="w-full border-collapse text-[12.5px]">
-                    <thead>
-                        <tr className="bg-white/[0.03]">
-                            {["User", "Role", "Orders", "Joined", "Status"].map(
-                                (col) => (
+                {/* Scrollable wrapper on small screens */}
+                <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-[12.5px] min-w-[480px]">
+                        <thead>
+                            <tr className="bg-white/[0.03]">
+                                {[
+                                    "User",
+                                    "Role",
+                                    "Orders",
+                                    "Joined",
+                                    "Status",
+                                ].map((col, i) => (
                                     <th
                                         key={col}
-                                        className="
-                    px-3.5 py-2.5 text-left text-[10.5px] font-medium
-                    text-white/35 border-b border-white/[0.08]
-                    uppercase tracking-[0.05em]
-                  "
+                                        className={`
+                                                px-3.5 py-2.5 text-left text-[10.5px] font-medium
+                                                text-white/35 border-b border-white/[0.08]
+                                                uppercase tracking-[0.05em]
+                                                ${i === 2 ? "hidden sm:table-cell" : ""}
+                                                ${i === 3 ? "hidden md:table-cell" : ""}
+                                            `}
                                     >
                                         {col}
                                     </th>
-                                ),
-                            )}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {recentUsers.map((u) => (
-                            <UserRow key={u.email} user={u} />
-                        ))}
-                    </tbody>
-                </table>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentUsers.map((u) => (
+                                <UserRow key={u.email} user={u} />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

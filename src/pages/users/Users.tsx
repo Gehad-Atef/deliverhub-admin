@@ -13,7 +13,6 @@ import { Badge } from "../../components/ui/Badge";
 import { Avatar } from "../../components/ui/Avatar";
 import { Spinner } from "../../components/ui/Spinner";
 
-// ─── Badge helpers ─────────────────────────────────────────────────────────────
 const roleBadge: Record<
     UserRole,
     React.ComponentProps<typeof Badge>["variant"]
@@ -73,7 +72,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         onSubmit(form);
     };
 
-    // Close on Escape
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose();
@@ -83,21 +81,24 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     }, [onClose]);
 
     return (
-        /* Backdrop */
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            {/* Panel */}
+            {/*
+             * On mobile: sheet slides up from bottom (rounded top corners only).
+             * On sm+: centred modal with rounded corners all around.
+             */}
             <div
                 className="
-        w-full max-w-md mx-4
-        bg-[#131d2e] border border-white/[0.08] rounded-2xl
-        shadow-2xl shadow-black/60
-        animate-[fadeSlideUp_.2s_ease]
-      "
+                    w-full sm:max-w-md sm:mx-4
+                    bg-[#131d2e] border border-white/[0.08]
+                    rounded-t-2xl sm:rounded-2xl
+                    shadow-2xl shadow-black/60
+                    animate-[fadeSlideUp_.2s_ease]
+                "
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
@@ -114,7 +115,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
                 {/* Body */}
                 <div className="px-5 py-5 space-y-4">
-                    {/* Name */}
                     <Field label="Full name" error={errors.name}>
                         <input
                             type="text"
@@ -128,7 +128,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                         />
                     </Field>
 
-                    {/* Email */}
                     <Field label="Email address" error={errors.email}>
                         <input
                             type="email"
@@ -142,7 +141,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                         />
                     </Field>
 
-                    {/* Phone */}
                     <Field label="Phone number" error={errors.phone}>
                         <input
                             type="tel"
@@ -156,7 +154,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                         />
                     </Field>
 
-                    {/* Role */}
                     <Field label="Role">
                         <div className="flex gap-2">
                             {(["customer", "driver"] as UserRole[]).map((r) => (
@@ -166,13 +163,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                                         setForm({ ...form, role: r })
                                     }
                                     className={`
-                    flex-1 py-2 rounded-lg border text-[12.5px] font-medium capitalize transition-colors
-                    ${
-                        form.role === r
-                            ? "bg-blue-600/20 border-blue-500/50 text-blue-400"
-                            : "bg-white/[0.04] border-white/[0.08] text-white/50 hover:border-white/20 hover:text-white/80"
-                    }
-                  `}
+                                        flex-1 py-2 rounded-lg border text-[12.5px] font-medium capitalize transition-colors
+                                        ${
+                                            form.role === r
+                                                ? "bg-blue-600/20 border-blue-500/50 text-blue-400"
+                                                : "bg-white/[0.04] border-white/[0.08] text-white/50 hover:border-white/20 hover:text-white/80"
+                                        }
+                                    `}
                                 >
                                     {r}
                                 </button>
@@ -192,11 +189,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     <button
                         onClick={handleSubmit}
                         disabled={saving}
-                        className="
-              flex items-center gap-2 px-5 py-2 rounded-lg text-[12.5px] font-medium
-              bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed
-              text-white transition-colors
-            "
+                        className="flex items-center gap-2 px-5 py-2 rounded-lg text-[12.5px] font-medium bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
                     >
                         {saving && <Spinner size="sm" />}
                         {saving ? "Adding…" : "Add user"}
@@ -245,13 +238,12 @@ const ViewUserModal: React.FC<{ userId: string; onClose: () => void }> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            <div className="w-full max-w-sm mx-4 bg-[#131d2e] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60">
-                {/* Header */}
+            <div className="w-full sm:max-w-sm sm:mx-4 bg-[#131d2e] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-black/60">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
                     <h2 className="font-['Syne',sans-serif] text-[15px] font-semibold text-white">
                         User details
@@ -264,9 +256,7 @@ const ViewUserModal: React.FC<{ userId: string; onClose: () => void }> = ({
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="px-5 py-5">
-                    {/* Avatar + name */}
                     <div className="flex items-center gap-3 mb-5">
                         <div className="w-12 h-12 rounded-full bg-blue-600/15 border border-blue-500/25 flex items-center justify-center text-[15px] font-semibold text-blue-400">
                             {user.initials}
@@ -292,7 +282,6 @@ const ViewUserModal: React.FC<{ userId: string; onClose: () => void }> = ({
                         </div>
                     </div>
 
-                    {/* Detail rows */}
                     <div className="space-y-0 border border-white/[0.07] rounded-xl overflow-hidden">
                         {[
                             { label: "Phone", value: user.phone },
@@ -344,7 +333,7 @@ const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => (
 const UsersSkeleton = () => (
     <div className="space-y-3">
         <Skeleton className="h-7 w-44" />
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {[...Array(3)].map((_, i) => (
                 <Skeleton key={i} className="h-[100px]" />
             ))}
@@ -367,13 +356,11 @@ const Users: React.FC = () => {
         dispatch(fetchUsers());
     }, [dispatch]);
 
-    // Sync local search with debounce
     useEffect(() => {
         const id = setTimeout(() => dispatch(setSearch(localSearch)), 250);
         return () => clearTimeout(id);
     }, [localSearch, dispatch]);
 
-    // Client-side filter (in a real app the thunk would handle this)
     const filtered = useMemo(() => {
         return users.filter((u) => {
             const matchRole = roleFilter === "all" || u.role === roleFilter;
@@ -428,9 +415,9 @@ const Users: React.FC = () => {
                     )}
                 </div>
 
-                {/* ── Stat cards ──────────────────────────────────────────────── */}
+                {/* ── Stat cards: 1 col → 3 cols ──────────────────────────────── */}
                 {stats && (
-                    <div className="grid grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <StatCard
                             label="Total users"
                             value={stats.total.toLocaleString()}
@@ -457,10 +444,10 @@ const Users: React.FC = () => {
 
                 {/* ── Table ───────────────────────────────────────────────────── */}
                 <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] overflow-hidden">
-                    {/* Toolbar */}
-                    <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/[0.08]">
+                    {/* Toolbar — wraps on small screens */}
+                    <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-white/[0.08]">
                         {/* Search */}
-                        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-[6px] w-[220px]">
+                        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-[6px] w-full sm:w-[220px]">
                             <i className="ti ti-search text-[15px] text-white/35 flex-shrink-0" />
                             <input
                                 type="text"
@@ -489,13 +476,13 @@ const Users: React.FC = () => {
                                             dispatch(setRoleFilter(r))
                                         }
                                         className={`
-                    px-3 py-1 rounded-md text-[11.5px] capitalize transition-colors
-                    ${
-                        roleFilter === r
-                            ? "bg-white/[0.10] text-white"
-                            : "text-white/40 hover:text-white/70"
-                    }
-                  `}
+                                            px-3 py-1 rounded-md text-[11.5px] capitalize transition-colors
+                                            ${
+                                                roleFilter === r
+                                                    ? "bg-white/[0.10] text-white"
+                                                    : "text-white/40 hover:text-white/70"
+                                            }
+                                        `}
                                     >
                                         {r === "all" ? "All roles" : r}
                                     </button>
@@ -504,192 +491,192 @@ const Users: React.FC = () => {
                         </div>
 
                         {/* Result count */}
-                        <span className="text-[11.5px] text-white/30 ml-1">
+                        <span className="text-[11.5px] text-white/30">
                             {filtered.length} result
                             {filtered.length !== 1 ? "s" : ""}
                         </span>
 
-                        {/* Add user */}
+                        {/* Add user — pushed right on sm+, full-width on xs */}
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="ml-auto flex items-center gap-1.5 px-4 py-[6px] rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-medium transition-colors"
+                            className="sm:ml-auto w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-[6px] rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-medium transition-colors"
                         >
                             <i className="ti ti-plus text-[14px]" />
                             Add user
                         </button>
                     </div>
 
-                    {/* Table */}
-                    <table className="w-full border-collapse text-[12.5px]">
-                        <thead>
-                            <tr className="bg-white/[0.03]">
-                                {[
-                                    "User",
-                                    "Phone",
-                                    "Role",
-                                    "Orders",
-                                    "Joined",
-                                    "Status",
-                                    "Actions",
-                                ].map((col) => (
-                                    <th
-                                        key={col}
-                                        className="px-3.5 py-2.5 text-left text-[10.5px] font-medium text-white/35 border-b border-white/[0.08] uppercase tracking-[0.05em]"
-                                    >
-                                        {col}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="px-4 py-12 text-center text-[13px] text-white/30"
-                                    >
-                                        <i className="ti ti-users-off text-[28px] block mb-2 mx-auto" />
-                                        No users match your search
-                                    </td>
-                                </tr>
-                            ) : (
-                                filtered.map((user) => {
-                                    const isActing = actionLoading === user.id;
-                                    return (
-                                        <tr
-                                            key={user.id}
-                                            className="group hover:bg-white/[0.025] transition-colors"
+                    {/* Table — scrollable on small screens */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-[12.5px] min-w-[560px]">
+                            <thead>
+                                <tr className="bg-white/[0.03]">
+                                    {[
+                                        "User",
+                                        "Phone",
+                                        "Role",
+                                        "Orders",
+                                        "Joined",
+                                        "Status",
+                                        "Actions",
+                                    ].map((col) => (
+                                        <th
+                                            key={col}
+                                            className="px-3.5 py-2.5 text-left text-[10.5px] font-medium text-white/35 border-b border-white/[0.08] uppercase tracking-[0.05em]"
                                         >
-                                            {/* User */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <div className="flex items-center gap-2.5">
-                                                    <Avatar
-                                                        initials={user.initials}
-                                                    />
-                                                    <div>
-                                                        <p className="text-[12.5px] text-white">
-                                                            {user.name}
-                                                        </p>
-                                                        <p className="text-[10.5px] text-white/35">
-                                                            {user.email}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            {/* Phone */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
-                                                {user.phone}
-                                            </td>
-                                            {/* Role */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <Badge
-                                                    variant={
-                                                        roleBadge[user.role]
-                                                    }
-                                                >
-                                                    {user.role
-                                                        .charAt(0)
-                                                        .toUpperCase() +
-                                                        user.role.slice(1)}
-                                                </Badge>
-                                            </td>
-                                            {/* Orders */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
-                                                {user.orders}
-                                            </td>
-                                            {/* Joined */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
-                                                {user.joined}
-                                            </td>
-                                            {/* Status */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <Badge
-                                                    variant={
-                                                        statusBadge[user.status]
-                                                    }
-                                                >
-                                                    {user.status
-                                                        .charAt(0)
-                                                        .toUpperCase() +
-                                                        user.status.slice(1)}
-                                                </Badge>
-                                            </td>
-                                            {/* Actions */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <div className="flex items-center gap-2">
-                                                    {/* View */}
-                                                    <button
-                                                        onClick={() =>
-                                                            setViewUserId(
-                                                                user.id,
-                                                            )
-                                                        }
-                                                        title="View details"
-                                                        className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-colors"
-                                                    >
-                                                        <i className="ti ti-eye text-[15px]" />
-                                                    </button>
-
-                                                    {/* Suspend / Restore */}
-                                                    {isActing ? (
-                                                        <Spinner
-                                                            size="sm"
-                                                            className="mx-1"
+                                            {col}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtered.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            className="px-4 py-12 text-center text-[13px] text-white/30"
+                                        >
+                                            <i className="ti ti-users-off text-[28px] block mb-2 mx-auto" />
+                                            No users match your search
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filtered.map((user) => {
+                                        const isActing =
+                                            actionLoading === user.id;
+                                        return (
+                                            <tr
+                                                key={user.id}
+                                                className="group hover:bg-white/[0.025] transition-colors"
+                                            >
+                                                {/* User */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <Avatar
+                                                            initials={
+                                                                user.initials
+                                                            }
                                                         />
-                                                    ) : user.status ===
-                                                      "active" ? (
+                                                        <div>
+                                                            <p className="text-[12.5px] text-white">
+                                                                {user.name}
+                                                            </p>
+                                                            <p className="text-[10.5px] text-white/35">
+                                                                {user.email}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
+                                                    {user.phone}
+                                                </td>
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <Badge
+                                                        variant={
+                                                            roleBadge[user.role]
+                                                        }
+                                                    >
+                                                        {user.role
+                                                            .charAt(0)
+                                                            .toUpperCase() +
+                                                            user.role.slice(1)}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
+                                                    {user.orders}
+                                                </td>
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
+                                                    {user.joined}
+                                                </td>
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <Badge
+                                                        variant={
+                                                            statusBadge[
+                                                                user.status
+                                                            ]
+                                                        }
+                                                    >
+                                                        {user.status
+                                                            .charAt(0)
+                                                            .toUpperCase() +
+                                                            user.status.slice(
+                                                                1,
+                                                            )}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <div className="flex items-center gap-2">
                                                         <button
                                                             onClick={() =>
-                                                                handleToggle(
+                                                                setViewUserId(
                                                                     user.id,
-                                                                    user.status,
                                                                 )
                                                             }
-                                                            title="Suspend user"
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                            title="View details"
+                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-colors"
                                                         >
-                                                            <i className="ti ti-ban text-[15px]" />
+                                                            <i className="ti ti-eye text-[15px]" />
                                                         </button>
-                                                    ) : user.status ===
-                                                      "inactive" ? (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleToggle(
-                                                                    user.id,
-                                                                    user.status,
-                                                                )
-                                                            }
-                                                            title="Activate user"
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
-                                                        >
-                                                            <i className="ti ti-player-play text-[15px]" />
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleToggle(
-                                                                    user.id,
-                                                                    user.status,
-                                                                )
-                                                            }
-                                                            title="Restore user"
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-green-400 hover:bg-green-500/10 transition-colors"
-                                                        >
-                                                            <i className="ti ti-refresh text-[15px]" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
+
+                                                        {isActing ? (
+                                                            <Spinner
+                                                                size="sm"
+                                                                className="mx-1"
+                                                            />
+                                                        ) : user.status ===
+                                                          "active" ? (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleToggle(
+                                                                        user.id,
+                                                                        user.status,
+                                                                    )
+                                                                }
+                                                                title="Suspend user"
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                            >
+                                                                <i className="ti ti-ban text-[15px]" />
+                                                            </button>
+                                                        ) : user.status ===
+                                                          "inactive" ? (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleToggle(
+                                                                        user.id,
+                                                                        user.status,
+                                                                    )
+                                                                }
+                                                                title="Activate user"
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                                            >
+                                                                <i className="ti ti-player-play text-[15px]" />
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleToggle(
+                                                                        user.id,
+                                                                        user.status,
+                                                                    )
+                                                                }
+                                                                title="Restore user"
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-green-400 hover:bg-green-500/10 transition-colors"
+                                                            >
+                                                                <i className="ti ti-refresh text-[15px]" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            {/* ── Modals ──────────────────────────────────────────────────────── */}
             {showAddModal && (
                 <AddUserModal
                     onClose={() => setShowAddModal(false)}
