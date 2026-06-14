@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
     fetchDisputes,
@@ -31,6 +32,12 @@ const partyIcon: Record<DisputePartyType, string> = {
     office: "ti ti-building-store",
 };
 
+const partyTypeKey: Record<DisputePartyType, string> = {
+    customer: "users.customer",
+    driver: "users.driver",
+    office: "offices.office",
+};
+
 // ─── Dispute Card ─────────────────────────────────────────────────────────────
 interface DisputeCardProps {
     dispute: Dispute;
@@ -45,8 +52,16 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
     onRefund,
     onRelease,
 }) => {
+    const { t } = useTranslation();
     const isResolved = dispute.status === "resolved";
     const isUrgent = dispute.status === "urgent";
+
+    const statusLabel =
+        dispute.status === "urgent"
+            ? t("disputes.urgent")
+            : dispute.status === "open"
+              ? t("disputes.open")
+              : t("disputes.resolved");
 
     return (
         <div
@@ -63,8 +78,7 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
                     {dispute.orderId} — {dispute.title}
                 </span>
                 <Badge variant={statusBadge[dispute.status]}>
-                    {dispute.status.charAt(0).toUpperCase() +
-                        dispute.status.slice(1)}
+                    {statusLabel}
                 </Badge>
             </div>
 
@@ -80,22 +94,26 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
                     <i
                         className={`${partyIcon[dispute.plaintiff.type]} text-[13px]`}
                     />
-                    {dispute.plaintiff.name} ({dispute.plaintiff.type})
+                    {dispute.plaintiff.name} (
+                    {t(partyTypeKey[dispute.plaintiff.type])})
                 </span>
 
-                <span className="text-[11px] text-white/20">vs</span>
+                <span className="text-[11px] text-white/20">
+                    {t("disputes.vs")}
+                </span>
 
                 {/* Defendant */}
                 <span className="text-[11px] text-white/35 flex items-center gap-1">
                     <i
                         className={`${partyIcon[dispute.defendant.type]} text-[13px]`}
                     />
-                    {dispute.defendant.name} ({dispute.defendant.type})
+                    {dispute.defendant.name} (
+                    {t(partyTypeKey[dispute.defendant.type])})
                 </span>
 
                 {/* Amount */}
                 <span className="text-[11px] text-white/25 ml-1">
-                    · ${dispute.amountAtRisk.toFixed(2)} at risk
+                    · ${dispute.amountAtRisk.toFixed(2)} {t("disputes.atRisk")}
                 </span>
 
                 {/* Actions */}
@@ -114,7 +132,7 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
                   "
                                 >
                                     <i className="ti ti-arrow-back-up text-[12px]" />
-                                    Refund customer
+                                    {t("disputes.refundCustomer")}
                                 </button>
                                 <button
                                     onClick={() => onRelease(dispute.id)}
@@ -135,7 +153,7 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
                 {isResolved && (
                     <div className="ml-auto flex items-center gap-1.5 text-[11px] text-green-400/70">
                         <i className="ti ti-circle-check text-[13px]" />
-                        Resolved
+                        {t("disputes.resolved_label")}
                     </div>
                 )}
             </div>
@@ -163,6 +181,9 @@ const DisputesSkeleton = () => (
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const Disputes: React.FC = () => {
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === "ar";
+
     const dispatch = useAppDispatch();
     const {
         disputes = [],
@@ -182,6 +203,13 @@ const Disputes: React.FC = () => {
         [disputes, filter],
     );
 
+    const filterTabs = [
+        { key: "all" as const, label: t("disputes.all") },
+        { key: "urgent" as const, label: t("disputes.urgent") },
+        { key: "open" as const, label: t("disputes.open") },
+        { key: "resolved" as const, label: t("disputes.resolved") },
+    ];
+
     if (loading && !disputes.length) return <DisputesSkeleton />;
 
     if (error && !disputes.length) {
@@ -193,40 +221,40 @@ const Disputes: React.FC = () => {
                     onClick={() => dispatch(fetchDisputes())}
                     className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
                 >
-                    Retry
+                    {t("disputes.retry")}
                 </button>
             </div>
         );
     }
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
             {/* ── Title ─────────────────────────────────────────────────────── */}
             <h1 className="font-['Syne',sans-serif] text-[18px] font-bold text-white">
-                Disputes
+                {t("disputes.title")}
             </h1>
 
             {/* ── Stat cards ────────────────────────────────────────────────── */}
             {stats && (
                 <div className="grid grid-cols-3 gap-2.5">
                     <StatCard
-                        label="Open disputes"
+                        label={t("disputes.openDisputes")}
                         value={stats.open.toString()}
-                        subText={`${stats.urgent} urgent`}
+                        subText={`${stats.urgent} ${t("disputes.urgent")}`}
                         trend="down"
                         icon="ti ti-alert-triangle"
                     />
                     <StatCard
-                        label="Resolved (month)"
+                        label={t("disputes.resolvedMonth")}
                         value={stats.resolvedThisMonth.toString()}
-                        subText={`Avg. ${stats.avgResolveHours}hrs to resolve`}
+                        subText={`${t("disputes.avgResolveHoursLabel")} ${stats.avgResolveHours} ${t("disputes.avgResolveHours")}`}
                         trend="up"
                         icon="ti ti-circle-check"
                     />
                     <StatCard
-                        label="Amount at risk"
+                        label={t("disputes.amountAtRisk")}
                         value={`$${stats.amountAtRisk.toLocaleString()}`}
-                        subText="Under review"
+                        subText={t("disputes.underReview")}
                         trend="neutral"
                         icon="ti ti-coin"
                     />
@@ -235,21 +263,21 @@ const Disputes: React.FC = () => {
 
             {/* ── Filter tabs ────────────────────────────────────────────────── */}
             <div className="flex items-center gap-1 bg-white/[0.05] border border-white/[0.08] rounded-lg p-1 w-fit">
-                {(["all", "urgent", "open", "resolved"] as const).map((f) => (
+                {filterTabs.map(({ key, label }) => (
                     <button
-                        key={f}
-                        onClick={() => dispatch(setFilter(f))}
+                        key={key}
+                        onClick={() => dispatch(setFilter(key))}
                         className={`
-              px-3 py-1.5 rounded-md text-[11.5px] capitalize transition-colors
-              ${filter === f ? "bg-white/[0.10] text-white" : "text-white/40 hover:text-white/70"}
+              px-3 py-1.5 rounded-md text-[11.5px] transition-colors
+              ${filter === key ? "bg-white/[0.10] text-white" : "text-white/40 hover:text-white/70"}
             `}
                     >
-                        {f === "all" ? "All" : f}
-                        {f !== "all" && f !== "resolved" && stats && (
+                        {label}
+                        {key !== "all" && key !== "resolved" && stats && (
                             <span
-                                className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] ${f === "urgent" ? "bg-red-500/20 text-red-400" : "bg-amber-500/20 text-amber-400"}`}
+                                className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] ${key === "urgent" ? "bg-red-500/20 text-red-400" : "bg-amber-500/20 text-amber-400"}`}
                             >
-                                {f === "urgent"
+                                {key === "urgent"
                                     ? stats.urgent
                                     : stats.open - stats.urgent}
                             </span>
@@ -263,7 +291,7 @@ const Disputes: React.FC = () => {
                 <div className="flex flex-col items-center justify-center h-48 gap-3 text-center bg-[#131d2e] border border-white/[0.08] rounded-[10px]">
                     <i className="ti ti-mood-happy text-[28px] text-white/20" />
                     <p className="text-[13px] text-white/30">
-                        No disputes in this category
+                        {t("disputes.noDisputes")}
                     </p>
                 </div>
             ) : (

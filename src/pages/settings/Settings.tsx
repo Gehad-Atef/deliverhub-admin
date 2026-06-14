@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar } from "../../components/ui/Avatar";
 import { Badge } from "../../components/ui/Badge";
 import { Bell, ShieldCheck, Settings2 } from "lucide-react";
@@ -94,7 +95,6 @@ const SectionHeader = ({
         <div className="w-8 h-8 rounded-lg bg-blue-600/15 border border-blue-500/20 flex items-center justify-center">
             <Icon size={18} className="text-blue-400" />
         </div>
-
         <div>
             <p className="text-[13.5px] font-semibold text-white">{title}</p>
             <p className="text-[11px] text-white/35 mt-0.5">{desc}</p>
@@ -130,7 +130,10 @@ const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
-const SaveToast: React.FC<{ visible: boolean }> = ({ visible }) => (
+const SaveToast: React.FC<{ visible: boolean; message: string }> = ({
+    visible,
+    message,
+}) => (
     <div
         className={`
     fixed bottom-6 left-1/2 -translate-x-1/2 z-50 whitespace-nowrap
@@ -141,7 +144,7 @@ const SaveToast: React.FC<{ visible: boolean }> = ({ visible }) => (
   `}
     >
         <i className="ti ti-circle-check text-[15px]" />
-        Changes saved successfully
+        {message}
     </div>
 );
 
@@ -166,6 +169,9 @@ const INITIAL_ADMINS: AdminAccount[] = [
 ];
 
 const Settings: React.FC = () => {
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === "ar";
+
     const [platform, setPlatform] = useState<PlatformSettings>({
         commissionRate: 7,
         subscriptionFee: 49,
@@ -194,15 +200,15 @@ const Settings: React.FC = () => {
 
     return (
         <>
-            <div className="w-full space-y-6">
+            <div className="w-full space-y-6" dir={isRTL ? "rtl" : "ltr"}>
                 {/* ── Page title ──────────────────────────────────────────────── */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="font-['Syne',sans-serif] text-[20px] font-bold text-white">
-                            Settings
+                            {t("settings.title")}
                         </h1>
                         <p className="text-[12.5px] text-white/35 mt-0.5">
-                            Manage platform configuration and preferences
+                            {t("settings.subtitle")}
                         </p>
                     </div>
                     <button
@@ -215,12 +221,12 @@ const Settings: React.FC = () => {
                         {saving ? (
                             <>
                                 <span className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                                Saving…
+                                {t("settings.saving")}
                             </>
                         ) : (
                             <>
                                 <i className="ti ti-device-floppy text-[15px]" />
-                                Save changes
+                                {t("settings.saveChanges")}
                             </>
                         )}
                     </button>
@@ -232,12 +238,12 @@ const Settings: React.FC = () => {
                     <Card>
                         <SectionHeader
                             icon={Settings2}
-                            title="Platform"
-                            desc="Fees and commission settings"
+                            title={t("settings.platform")}
+                            desc={t("settings.platformDesc")}
                         />
                         <SettingRow
-                            label="Commission rate"
-                            desc="Percentage taken from each delivery fee"
+                            label={t("settings.commissionRate")}
+                            desc={t("settings.commissionRateDesc")}
                             control={
                                 <NumInput
                                     value={platform.commissionRate}
@@ -254,8 +260,8 @@ const Settings: React.FC = () => {
                             }
                         />
                         <SettingRow
-                            label="Office subscription fee"
-                            desc="Monthly fee for offices on the platform"
+                            label={t("settings.subscriptionFee")}
+                            desc={t("settings.subscriptionFeeDesc")}
                             control={
                                 <NumInput
                                     value={platform.subscriptionFee}
@@ -270,8 +276,8 @@ const Settings: React.FC = () => {
                             }
                         />
                         <SettingRow
-                            label="Featured listing fee"
-                            desc="One-time fee to appear at top of results"
+                            label={t("settings.featuredListingFee")}
+                            desc={t("settings.featuredListingFeeDesc")}
                             control={
                                 <NumInput
                                     value={platform.featuredListingFee}
@@ -291,12 +297,12 @@ const Settings: React.FC = () => {
                     <Card>
                         <SectionHeader
                             icon={Bell}
-                            title="Notifications"
-                            desc="Control what alerts you receive"
+                            title={t("settings.notifications")}
+                            desc={t("settings.notificationsDesc")}
                         />
                         <SettingRow
-                            label="New dispute alerts"
-                            desc="Notify admin when a new dispute is opened"
+                            label={t("settings.newDisputeAlerts")}
+                            desc={t("settings.newDisputeAlertsDesc")}
                             control={
                                 <Toggle
                                     checked={notifications.newDisputeAlerts}
@@ -307,8 +313,8 @@ const Settings: React.FC = () => {
                             }
                         />
                         <SettingRow
-                            label="New office registrations"
-                            desc="Notify when a new office requests approval"
+                            label={t("settings.newOfficeRegistrations")}
+                            desc={t("settings.newOfficeRegistrationsDesc")}
                             control={
                                 <Toggle
                                     checked={
@@ -321,8 +327,8 @@ const Settings: React.FC = () => {
                             }
                         />
                         <SettingRow
-                            label="Daily revenue report"
-                            desc="Send daily summary at midnight"
+                            label={t("settings.dailyRevenueReport")}
+                            desc={t("settings.dailyRevenueReportDesc")}
                             control={
                                 <Toggle
                                     checked={notifications.dailyRevenueReport}
@@ -338,8 +344,8 @@ const Settings: React.FC = () => {
                     <Card>
                         <SectionHeader
                             icon={ShieldCheck}
-                            title="Admin Accounts"
-                            desc="Manage who has admin access"
+                            title={t("settings.adminAccounts")}
+                            desc={t("settings.adminAccountsDesc")}
                         />
                         {admins.map((admin) => (
                             <div
@@ -359,17 +365,19 @@ const Settings: React.FC = () => {
                                         <p className="text-[11px] text-white/35 mt-0.5 truncate">
                                             {admin.email} ·{" "}
                                             {admin.role === "super_admin"
-                                                ? "Super admin"
-                                                : "Moderator"}
+                                                ? t("settings.superAdmin")
+                                                : t("settings.moderator")}
                                         </p>
                                     </div>
                                 </div>
                                 {admin.isYou ? (
-                                    <Badge variant="blue">You</Badge>
+                                    <Badge variant="blue">
+                                        {t("settings.you")}
+                                    </Badge>
                                 ) : (
                                     <button
                                         onClick={() => removeAdmin(admin.id)}
-                                        title="Remove admin"
+                                        title={t("settings.removeAdmin")}
                                         className="w-7 h-7 flex items-center justify-center rounded-lg
                       text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors flex-shrink-0"
                                     >
@@ -382,7 +390,10 @@ const Settings: React.FC = () => {
                 </div>
             </div>
 
-            <SaveToast visible={toastVisible} />
+            <SaveToast
+                visible={toastVisible}
+                message={t("settings.savedSuccess")}
+            />
         </>
     );
 };

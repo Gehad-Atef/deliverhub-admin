@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { fetchDashboardData } from "../../store/slices/dashboardSlice";
 import { StatCard } from "../../components/shared/StatCard";
@@ -12,14 +13,32 @@ import type {
     RecentUser,
 } from "../../types/dashboard";
 
+// Maps API label strings → i18n keys
+// Revenue source labels coming from the store (English strings from API)
+const revenueSourceLabelMap: Record<string, string> = {
+    Commission: "revenue.commission",
+    Subscriptions: "revenue.subscriptions", // add this key to en.ts / ar.ts
+    Featured: "offices.featured",
+};
+
+// Escrow status labels coming from the store
+const escrowLabelMap: Record<string, string> = {
+    Released: "escrow.released",
+    Frozen: "escrow.held",
+    "In review": "escrow.disputed",
+    Held: "escrow.held",
+    Refunded: "escrow.refunded",
+    Disputed: "escrow.disputed",
+};
+
 const orderStatusMap: Record<
     RecentOrder["status"],
-    { label: string; variant: React.ComponentProps<typeof Badge>["variant"] }
+    { labelKey: string; variant: React.ComponentProps<typeof Badge>["variant"] }
 > = {
-    in_transit: { label: "In transit", variant: "blue" },
-    delivered: { label: "Delivered", variant: "green" },
-    pending_offer: { label: "Pending offer", variant: "amber" },
-    dispute: { label: "Dispute", variant: "red" },
+    in_transit: { labelKey: "shipments.inTransit", variant: "blue" },
+    delivered: { labelKey: "shipments.delivered", variant: "green" },
+    pending_offer: { labelKey: "shipments.pending", variant: "amber" },
+    dispute: { labelKey: "disputes", variant: "red" },
 };
 
 const userStatusMap: Record<
@@ -61,7 +80,8 @@ const BarRow: React.FC<{
 );
 
 const OrderRow: React.FC<{ order: RecentOrder }> = ({ order }) => {
-    const { label, variant } = orderStatusMap[order.status];
+    const { t } = useTranslation();
+    const { labelKey, variant } = orderStatusMap[order.status];
     return (
         <div className="flex items-center justify-between py-[7.5px] border-b border-white/[0.08] last:border-none">
             <div>
@@ -72,41 +92,49 @@ const OrderRow: React.FC<{ order: RecentOrder }> = ({ order }) => {
                     {order.customer} · {order.timeAgo}
                 </p>
             </div>
-            <Badge variant={variant}>{label}</Badge>
+            <Badge variant={variant}>{t(labelKey)}</Badge>
         </div>
     );
 };
 
-const UserRow: React.FC<{ user: RecentUser }> = ({ user }) => (
-    <tr className="group">
-        <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
-            <div className="flex items-center gap-2.5">
-                <Avatar initials={user.initials} />
-                <div>
-                    <p className="text-[12.5px] text-white">{user.name}</p>
-                    <p className="text-[10.5px] text-white/35">{user.email}</p>
+const UserRow: React.FC<{ user: RecentUser }> = ({ user }) => {
+    const { t } = useTranslation();
+    return (
+        <tr className="group">
+            <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
+                <div className="flex items-center gap-2.5">
+                    <Avatar initials={user.initials} />
+                    <div>
+                        <p className="text-[12.5px] text-white">{user.name}</p>
+                        <p className="text-[10.5px] text-white/35">
+                            {user.email}
+                        </p>
+                    </div>
                 </div>
-            </div>
-        </td>
-        <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
-            <Badge variant={userRoleMap[user.role]}>
-                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-            </Badge>
-        </td>
-        {/* Orders & Joined hidden on small screens */}
-        <td className="hidden sm:table-cell px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
-            {user.orders}
-        </td>
-        <td className="hidden md:table-cell px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
-            {user.joined}
-        </td>
-        <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
-            <Badge variant={userStatusMap[user.status]}>
-                {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-            </Badge>
-        </td>
-    </tr>
-);
+            </td>
+            <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
+                <Badge variant={userRoleMap[user.role]}>
+                    {user.role === "customer"
+                        ? t("users.customer")
+                        : t("users.driver")}
+                </Badge>
+            </td>
+            <td className="hidden sm:table-cell px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
+                {user.orders}
+            </td>
+            <td className="hidden md:table-cell px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none text-[12.5px] text-white/85">
+                {user.joined}
+            </td>
+            <td className="px-3.5 py-2.5 border-b border-white/[0.08] group-last:border-none">
+                <Badge variant={userStatusMap[user.status]}>
+                    {user.status === "active"
+                        ? t("users.active")
+                        : t("users.suspended")}
+                </Badge>
+            </td>
+        </tr>
+    );
+};
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({
     className = "",
@@ -116,7 +144,6 @@ const SkeletonBlock: React.FC<{ className?: string }> = ({
 
 const DashboardSkeleton: React.FC = () => (
     <div className="space-y-4">
-        {/* 4 cols on lg, 2 on sm, 1 on xs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {[...Array(4)].map((_, i) => (
                 <SkeletonBlock key={i} className="h-[100px]" />
@@ -131,6 +158,8 @@ const DashboardSkeleton: React.FC = () => (
 );
 
 const Dashboard: React.FC = () => {
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === "ar";
     const dispatch = useAppDispatch();
     const {
         stats,
@@ -155,7 +184,7 @@ const Dashboard: React.FC = () => {
                     onClick={() => dispatch(fetchDashboardData())}
                     className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors duration-150"
                 >
-                    Retry
+                    {t("common.loading")}
                 </button>
             </div>
         );
@@ -165,54 +194,62 @@ const Dashboard: React.FC = () => {
 
     const statCards = [
         {
-            label: "Total orders",
+            label: t("shipments.totalShipments"),
             value: stats.totalOrders.toLocaleString(),
-            subText: `↑ ${stats.totalOrdersTrend}% this week`,
+            subText: `↑ ${stats.totalOrdersTrend}% ${t("users.thisWeek")}`,
             trend: "up" as const,
             icon: "ti ti-package",
         },
         {
-            label: "Registered users",
+            label: t("users.totalUsers"),
             value: stats.registeredUsers.toLocaleString(),
-            subText: `↑ ${stats.registeredUsersTrend}% this week`,
+            subText: `↑ ${stats.registeredUsersTrend}% ${t("users.thisWeek")}`,
             trend: "up" as const,
             icon: "ti ti-users",
         },
         {
-            label: "Active drivers",
+            label: t("drivers.onlineNow"),
             value: stats.activeDrivers.toLocaleString(),
-            subText: `${stats.driversOnline} online now`,
+            subText: `${stats.driversOnline} ${t("drivers.onlineNow").toLowerCase()}`,
             trend: "neutral" as const,
             icon: "ti ti-bike",
         },
         {
-            label: "Revenue (month)",
+            label: t("revenue.totalRevenue"),
             value: `$${stats.monthlyRevenue.toLocaleString()}`,
-            subText: `↑ ${stats.revenueTrend}% vs last month`,
+            subText: `↑ ${stats.revenueTrend}%`,
             trend: "up" as const,
             icon: "ti ti-coin",
         },
     ];
 
+    const tableColumns = [
+        t("users.user"),
+        t("users.role"),
+        t("users.orders"),
+        t("users.joined"),
+        t("users.status"),
+    ];
+
     return (
-        <div className="space-y-3">
-            {/* ── Stat cards: 1 col → 2 col → 4 col ───────────────────────── */}
+        <div className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
+            {/* ── Stat cards ───────────────────────────────────────────────── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 {statCards.map((card) => (
                     <StatCard key={card.label} {...card} />
                 ))}
             </div>
 
-            {/* ── Two-column row: stacked on mobile, side-by-side on lg+ ───── */}
+            {/* ── Two-column row ────────────────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
                 {/* Recent orders */}
                 <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] p-[1.1rem_1.15rem]">
                     <div className="flex items-center justify-between mb-4">
                         <span className="font-['Syne',sans-serif] text-[13px] font-semibold text-white">
-                            Recent orders
+                            {t("shipments.title")}
                         </span>
                         <button className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
-                            See all →
+                            {isRTL ? "← عرض الكل" : "See all →"}
                         </button>
                     </div>
                     {recentOrders.map((o) => (
@@ -224,13 +261,21 @@ const Dashboard: React.FC = () => {
                 <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] p-[1.1rem_1.15rem] flex flex-col gap-5">
                     <div>
                         <p className="font-['Syne',sans-serif] text-[13px] font-semibold text-white mb-3">
-                            Revenue by source
+                            {t("revenue.revenueBreakdown")}
                         </p>
                         <div className="flex flex-col gap-2.5">
                             {revenueSources.map((src: RevenueSource) => (
                                 <BarRow
                                     key={src.label}
-                                    label={src.label}
+                                    label={
+                                        revenueSourceLabelMap[src.label]
+                                            ? t(
+                                                  revenueSourceLabelMap[
+                                                      src.label
+                                                  ],
+                                              )
+                                            : src.label
+                                    }
                                     fill={src.percentage}
                                     valueText={`${src.percentage}%`}
                                     color={src.color}
@@ -243,13 +288,17 @@ const Dashboard: React.FC = () => {
 
                     <div>
                         <p className="font-['Syne',sans-serif] text-[13px] font-semibold text-white mb-3">
-                            Escrow status
+                            {t("escrow.title")}
                         </p>
                         <div className="flex flex-col gap-2.5">
                             {escrowStatuses.map((esc: EscrowStatus) => (
                                 <BarRow
                                     key={esc.label}
-                                    label={esc.label}
+                                    label={
+                                        escrowLabelMap[esc.label]
+                                            ? t(escrowLabelMap[esc.label])
+                                            : esc.label
+                                    }
                                     fill={esc.percentage}
                                     valueText={`$${esc.amount.toLocaleString()}`}
                                     color={esc.color}
@@ -264,34 +313,29 @@ const Dashboard: React.FC = () => {
             <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] overflow-hidden">
                 <div className="flex items-center justify-between px-[1.1rem] py-[0.85rem] border-b border-white/[0.08]">
                     <span className="font-['Syne',sans-serif] text-[13px] font-semibold text-white">
-                        Recent users
+                        {t("users.title")}
                     </span>
                     <button className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
-                        View all users →
+                        {isRTL
+                            ? `← ${t("users.viewDetails")}`
+                            : `${t("users.viewDetails")} →`}
                     </button>
                 </div>
 
-                {/* Scrollable wrapper on small screens */}
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-[12.5px] min-w-[480px]">
                         <thead>
                             <tr className="bg-white/[0.03]">
-                                {[
-                                    "User",
-                                    "Role",
-                                    "Orders",
-                                    "Joined",
-                                    "Status",
-                                ].map((col, i) => (
+                                {tableColumns.map((col, i) => (
                                     <th
                                         key={col}
                                         className={`
-                                                px-3.5 py-2.5 text-left text-[10.5px] font-medium
-                                                text-white/35 border-b border-white/[0.08]
-                                                uppercase tracking-[0.05em]
-                                                ${i === 2 ? "hidden sm:table-cell" : ""}
-                                                ${i === 3 ? "hidden md:table-cell" : ""}
-                                            `}
+                                            px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium
+                                            text-white/35 border-b border-white/[0.08]
+                                            uppercase tracking-[0.05em]
+                                            ${i === 2 ? "hidden sm:table-cell" : ""}
+                                            ${i === 3 ? "hidden md:table-cell" : ""}
+                                        `}
                                     >
                                         {col}
                                     </th>

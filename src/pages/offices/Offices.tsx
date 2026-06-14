@@ -1,18 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
     fetchOffices,
-    addOffice,
     approveOffice,
     toggleOfficeStatus,
     setSearch,
     setStatusFilter,
 } from "../../store/slices/officesSlice";
-import type {
-    AddOfficePayload,
-    OfficePlan,
-    OfficeStatus,
-} from "../../types/office";
+import type { OfficeStatus, OfficePlan } from "../../types/office";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
 import { Spinner } from "../../components/ui/Spinner";
@@ -54,78 +50,43 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => (
     </div>
 );
 
-// ─── Add Office Modal ─────────────────────────────────────────────────────────
-const EMPTY: AddOfficePayload = {
-    name: "",
-    email: "",
-    phone: "",
-    city: "",
-    coverageArea: "",
-    plan: "basic",
-};
-
-interface AddOfficeModalProps {
-    onClose: () => void;
-    onSubmit: (p: AddOfficePayload) => void;
-    saving: boolean;
-}
-
-const AddOfficeModal: React.FC<AddOfficeModalProps> = ({
+// ─── View Office Modal ────────────────────────────────────────────────────────
+const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
+    officeId,
     onClose,
-    onSubmit,
-    saving,
 }) => {
-    const [form, setForm] = useState<AddOfficePayload>(EMPTY);
-    const [errors, setErrors] = useState<
-        Partial<Record<keyof AddOfficePayload, string>>
-    >({});
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === "ar";
+    const office = useAppSelector((s) =>
+        s.offices.offices.find((o) => o.id === officeId),
+    );
+    if (!office) return null;
 
-    const validate = () => {
-        const e: typeof errors = {};
-        if (!form.name.trim()) e.name = "Name is required";
-        if (!form.email.trim()) e.email = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email";
-        if (!form.phone.trim()) e.phone = "Phone is required";
-        if (!form.city.trim()) e.city = "City is required";
-        if (!form.coverageArea.trim())
-            e.coverageArea = "Coverage area is required";
-        return e;
-    };
-
-    const handleSubmit = () => {
-        const e = validate();
-        if (Object.keys(e).length) {
-            setErrors(e);
-            return;
-        }
-        onSubmit(form);
-    };
-
-    useEffect(() => {
-        const h = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
-        window.addEventListener("keydown", h);
-        return () => window.removeEventListener("keydown", h);
-    }, [onClose]);
-
-    const set = (k: keyof AddOfficePayload, v: string) => {
-        setForm({ ...form, [k]: v });
-        setErrors({ ...errors, [k]: undefined });
-    };
+    const fields = [
+        { label: t("auth.email"), value: office.email },
+        { label: t("users.phone"), value: office.phone },
+        { label: t("offices.coverageArea"), value: office.coverageArea },
+        { label: t("users.orders"), value: office.orders.toLocaleString() },
+        {
+            label: t("offices.rating"),
+            value: <StarRating rating={office.rating} />,
+        },
+        { label: t("users.joined"), value: office.joinedAt },
+    ];
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+            dir={isRTL ? "rtl" : "ltr"}
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            <div className="w-full max-w-md mx-4 bg-[#131d2e] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60">
+            <div className="w-full sm:max-w-sm sm:mx-4 bg-[#131d2e] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-black/60">
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
                     <h2 className="font-['Syne',sans-serif] text-[15px] font-semibold text-white">
-                        Add new office
+                        {t("offices.officeDetails")}
                     </h2>
                     <button
                         onClick={onClose}
@@ -136,138 +97,7 @@ const AddOfficeModal: React.FC<AddOfficeModalProps> = ({
                 </div>
 
                 {/* Body */}
-                <div className="px-5 py-5 space-y-4">
-                    <Field label="Office name" error={errors.name}>
-                        <input
-                            value={form.name}
-                            onChange={(e) => set("name", e.target.value)}
-                            placeholder="e.g. Fast Arrow"
-                            className={inputCls(!!errors.name)}
-                        />
-                    </Field>
-                    <div className="grid grid-cols-2 gap-3">
-                        <Field label="Email" error={errors.email}>
-                            <input
-                                type="email"
-                                value={form.email}
-                                onChange={(e) => set("email", e.target.value)}
-                                placeholder="office@email.com"
-                                className={inputCls(!!errors.email)}
-                            />
-                        </Field>
-                        <Field label="Phone" error={errors.phone}>
-                            <input
-                                type="tel"
-                                value={form.phone}
-                                onChange={(e) => set("phone", e.target.value)}
-                                placeholder="+20 100 000 0000"
-                                className={inputCls(!!errors.phone)}
-                            />
-                        </Field>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <Field label="City" error={errors.city}>
-                            <input
-                                value={form.city}
-                                onChange={(e) => set("city", e.target.value)}
-                                placeholder="e.g. Cairo"
-                                className={inputCls(!!errors.city)}
-                            />
-                        </Field>
-                        <Field
-                            label="Coverage area"
-                            error={errors.coverageArea}
-                        >
-                            <input
-                                value={form.coverageArea}
-                                onChange={(e) =>
-                                    set("coverageArea", e.target.value)
-                                }
-                                placeholder="e.g. Nasr City"
-                                className={inputCls(!!errors.coverageArea)}
-                            />
-                        </Field>
-                    </div>
-
-                    {/* Plan selector */}
-                    <Field label="Plan">
-                        <div className="flex gap-2">
-                            {(
-                                ["basic", "premium", "featured"] as OfficePlan[]
-                            ).map((p) => (
-                                <button
-                                    key={p}
-                                    onClick={() => set("plan", p)}
-                                    className={`
-                    flex-1 py-2 rounded-lg border text-[12px] font-medium capitalize transition-colors
-                    ${
-                        form.plan === p
-                            ? "bg-blue-600/20 border-blue-500/50 text-blue-400"
-                            : "bg-white/[0.04] border-white/[0.08] text-white/50 hover:border-white/20 hover:text-white/80"
-                    }
-                  `}
-                                >
-                                    {p}
-                                </button>
-                            ))}
-                        </div>
-                    </Field>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-end gap-2.5 px-5 py-4 border-t border-white/[0.08]">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-lg text-[12.5px] text-white/55 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={saving}
-                        className="flex items-center gap-2 px-5 py-2 rounded-lg text-[12.5px] font-medium bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors"
-                    >
-                        {saving && <Spinner size="sm" />}
-                        {saving ? "Adding…" : "Add office"}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// ─── View Office Modal ────────────────────────────────────────────────────────
-const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
-    officeId,
-    onClose,
-}) => {
-    const office = useAppSelector((s) =>
-        s.offices.offices.find((o) => o.id === officeId),
-    );
-    if (!office) return null;
-
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={(e) => {
-                if (e.target === e.currentTarget) onClose();
-            }}
-        >
-            <div className="w-full max-w-sm mx-4 bg-[#131d2e] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
-                    <h2 className="font-['Syne',sans-serif] text-[15px] font-semibold text-white">
-                        Office details
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-colors"
-                    >
-                        <i className="ti ti-x text-[16px]" />
-                    </button>
-                </div>
-
                 <div className="px-5 py-5">
-                    {/* Header */}
                     <div className="flex items-center gap-3 mb-5">
                         <div className="w-12 h-12 rounded-xl bg-blue-600/15 border border-blue-500/25 flex items-center justify-center text-[15px] font-semibold text-blue-400">
                             {office.initials}
@@ -282,34 +112,16 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
                         </div>
                         <div className="ml-auto flex flex-col items-end gap-1">
                             <Badge variant={statusBadge[office.status]}>
-                                {office.status.charAt(0).toUpperCase() +
-                                    office.status.slice(1)}
+                                {t(`offices.${office.status}`)}
                             </Badge>
                             <Badge variant={planBadge[office.plan]}>
-                                {office.plan.charAt(0).toUpperCase() +
-                                    office.plan.slice(1)}
+                                {t(`offices.${office.plan}`)}
                             </Badge>
                         </div>
                     </div>
 
-                    <div className="space-y-0 border border-white/[0.07] rounded-xl overflow-hidden">
-                        {[
-                            { label: "Email", value: office.email },
-                            { label: "Phone", value: office.phone },
-                            {
-                                label: "Coverage area",
-                                value: office.coverageArea,
-                            },
-                            {
-                                label: "Total orders",
-                                value: office.orders.toLocaleString(),
-                            },
-                            {
-                                label: "Rating",
-                                value: <StarRating rating={office.rating} />,
-                            },
-                            { label: "Joined", value: office.joinedAt },
-                        ].map(({ label, value }) => (
+                    <div className="border border-white/[0.07] rounded-xl overflow-hidden">
+                        {fields.map(({ label, value }) => (
                             <div
                                 key={label}
                                 className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07] last:border-none"
@@ -330,7 +142,7 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
                         onClick={onClose}
                         className="w-full py-2 rounded-lg text-[12.5px] text-white/55 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] transition-colors"
                     >
-                        Close
+                        {t("offices.close")}
                     </button>
                 </div>
             </div>
@@ -338,28 +150,7 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
     );
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const Field: React.FC<{
-    label: string;
-    error?: string;
-    children: React.ReactNode;
-}> = ({ label, error, children }) => (
-    <div className="space-y-1.5">
-        <label className="block text-[11.5px] text-white/55 font-medium">
-            {label}
-        </label>
-        {children}
-        {error && <p className="text-[11px] text-red-400">{error}</p>}
-    </div>
-);
-
-const inputCls = (hasError: boolean) => `
-  w-full bg-white/[0.05] border rounded-lg px-3 py-2
-  text-[12.5px] text-white placeholder:text-white/30
-  outline-none transition-colors font-['DM_Sans',sans-serif]
-  ${hasError ? "border-red-500/60 focus:border-red-500" : "border-white/[0.08] focus:border-blue-500/60"}
-`;
-
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
 const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => (
     <div className={`bg-white/[0.06] rounded-lg animate-pulse ${className}`} />
 );
@@ -367,7 +158,7 @@ const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => (
 const OfficesSkeleton = () => (
     <div className="space-y-3">
         <Skeleton className="h-7 w-44" />
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {[...Array(3)].map((_, i) => (
                 <Skeleton key={i} className="h-[100px]" />
             ))}
@@ -378,18 +169,20 @@ const OfficesSkeleton = () => (
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const Offices: React.FC = () => {
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === "ar";
+
     const dispatch = useAppDispatch();
     const {
-        offices,
-        stats,
-        loading,
-        actionLoading,
-        error,
-        search,
-        statusFilter,
-    } = useAppSelector((s) => s.offices);
+        offices = [],
+        stats = null,
+        loading = false,
+        actionLoading = null,
+        error = null,
+        search = "",
+        statusFilter = "all",
+    } = useAppSelector((s) => s.offices) ?? {};
 
-    const [showAddModal, setShowAddModal] = useState(false);
     const [viewOfficeId, setViewOfficeId] = useState<string | null>(null);
     const [localSearch, setLocalSearch] = useState("");
 
@@ -397,6 +190,7 @@ const Offices: React.FC = () => {
         dispatch(fetchOffices());
     }, [dispatch]);
 
+    // Debounced search
     useEffect(() => {
         const id = setTimeout(() => dispatch(setSearch(localSearch)), 250);
         return () => clearTimeout(id);
@@ -417,16 +211,30 @@ const Offices: React.FC = () => {
         [offices, search, statusFilter],
     );
 
-    const handleAdd = (p: AddOfficePayload) =>
-        dispatch(addOffice(p))
-            .unwrap()
-            .then(() => setShowAddModal(false));
     const handleApprove = (id: string) => dispatch(approveOffice(id));
     const handleToggle = (id: string, s: OfficeStatus) =>
         dispatch(toggleOfficeStatus({ id, currentStatus: s }));
 
-    if (loading && !offices.length) return <OfficesSkeleton />;
+    // ── Status filter tabs ──
+    const statusTabs = [
+        { key: "all" as const, label: t("offices.all") },
+        { key: "active" as const, label: t("offices.active") },
+        { key: "pending" as const, label: t("offices.pending") },
+        { key: "suspended" as const, label: t("offices.suspended") },
+    ];
 
+    // ── Table columns ──
+    const tableColumns = [
+        t("offices.office"),
+        t("offices.coverageArea"),
+        t("offices.plan"),
+        t("offices.orders"),
+        t("offices.rating"),
+        t("offices.status"),
+        t("offices.actions"),
+    ];
+
+    // ── Error state ──
     if (error && !offices.length) {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-3 text-center">
@@ -442,58 +250,61 @@ const Offices: React.FC = () => {
         );
     }
 
+    // ── Loading state ──
+    if (loading && !offices.length) return <OfficesSkeleton />;
+
     return (
         <>
-            <div className="space-y-3">
-                {/* ── Title ───────────────────────────────────────────────────── */}
+            <div className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
+                {/* ── Title ─────────────────────────────────────────────── */}
                 <div className="flex items-baseline gap-2">
                     <h1 className="font-['Syne',sans-serif] text-[18px] font-bold text-white">
-                        Delivery offices
+                        {t("offices.title")}
                     </h1>
                     {stats && (
                         <span className="text-[13px] text-white/35">
-                            — {stats.total} total
+                            — {stats.total} {t("offices.total")}
                         </span>
                     )}
                 </div>
 
-                {/* ── Stat cards ──────────────────────────────────────────────── */}
+                {/* ── Stat cards ────────────────────────────────────────── */}
                 {stats && (
-                    <div className="grid grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <StatCard
-                            label="Total offices"
+                            label={t("offices.totalOffices")}
                             value={stats.total.toString()}
-                            subText={`↑ ${stats.monthTrend} this month`}
+                            subText={`↑ ${stats.monthTrend} ${t("offices.thisMonth")}`}
                             trend="up"
                             icon="ti ti-building-store"
                         />
                         <StatCard
-                            label="Verified"
+                            label={t("offices.verified")}
                             value={stats.verified.toString()}
-                            subText={`${stats.pendingReview} pending review`}
+                            subText={`${stats.pendingReview} ${t("offices.pendingReview")}`}
                             trend="neutral"
                             icon="ti ti-circle-check"
                         />
                         <StatCard
-                            label="Avg. rating"
+                            label={t("offices.avgRating")}
                             value={stats.avgRating.toFixed(1)}
-                            subText="Platform average"
+                            subText={t("offices.platformAverage")}
                             trend="neutral"
                             icon="ti ti-star"
                         />
                     </div>
                 )}
 
-                {/* ── Table ───────────────────────────────────────────────────── */}
+                {/* ── Table ─────────────────────────────────────────────── */}
                 <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] overflow-hidden">
                     {/* Toolbar */}
-                    <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/[0.08]">
+                    <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-white/[0.08]">
                         {/* Search */}
-                        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-[6px] w-[220px]">
+                        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-[6px] w-full sm:w-[220px]">
                             <i className="ti ti-search text-[15px] text-white/35 flex-shrink-0" />
                             <input
                                 type="text"
-                                placeholder="Search offices…"
+                                placeholder={t("offices.searchPlaceholder")}
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
                                 className="bg-transparent border-none outline-none text-[12.5px] text-white placeholder:text-white/30 w-full font-['DM_Sans',sans-serif]"
@@ -510,225 +321,204 @@ const Offices: React.FC = () => {
 
                         {/* Status filter */}
                         <div className="flex items-center gap-1 bg-white/[0.05] border border-white/[0.08] rounded-lg p-1">
-                            {(
-                                [
-                                    "all",
-                                    "active",
-                                    "pending",
-                                    "suspended",
-                                ] as const
-                            ).map((s) => (
+                            {statusTabs.map(({ key, label }) => (
                                 <button
-                                    key={s}
-                                    onClick={() => dispatch(setStatusFilter(s))}
-                                    className={`
-                    px-3 py-1 rounded-md text-[11.5px] capitalize transition-colors
-                    ${statusFilter === s ? "bg-white/[0.10] text-white" : "text-white/40 hover:text-white/70"}
-                  `}
+                                    key={key}
+                                    onClick={() =>
+                                        dispatch(setStatusFilter(key))
+                                    }
+                                    className={`px-3 py-1 rounded-md text-[11.5px] transition-colors
+                                        ${statusFilter === key ? "bg-white/[0.10] text-white" : "text-white/40 hover:text-white/70"}`}
                                 >
-                                    {s === "all" ? "All" : s}
+                                    {label}
                                 </button>
                             ))}
                         </div>
 
-                        <span className="text-[11.5px] text-white/30 ml-1">
-                            {filtered.length} result
-                            {filtered.length !== 1 ? "s" : ""}
+                        <span className="text-[11.5px] text-white/30">
+                            {filtered.length}{" "}
+                            {filtered.length !== 1
+                                ? t("offices.results")
+                                : t("offices.result")}
                         </span>
-
-                        <button
-                            onClick={() => setShowAddModal(true)}
-                            className="ml-auto flex items-center gap-1.5 px-4 py-[6px] rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-medium transition-colors"
-                        >
-                            <i className="ti ti-plus text-[14px]" />
-                            Add office
-                        </button>
                     </div>
 
                     {/* Table */}
-                    <table className="w-full border-collapse text-[12.5px]">
-                        <thead>
-                            <tr className="bg-white/[0.03]">
-                                {[
-                                    "Office",
-                                    "Coverage area",
-                                    "Plan",
-                                    "Orders",
-                                    "Rating",
-                                    "Status",
-                                    "Actions",
-                                ].map((col) => (
-                                    <th
-                                        key={col}
-                                        className="px-3.5 py-2.5 text-left text-[10.5px] font-medium text-white/35 border-b border-white/[0.08] uppercase tracking-[0.05em]"
-                                    >
-                                        {col}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="px-4 py-12 text-center text-[13px] text-white/30"
-                                    >
-                                        <i className="ti ti-building-off text-[28px] block mb-2 mx-auto" />
-                                        No offices match your search
-                                    </td>
-                                </tr>
-                            ) : (
-                                filtered.map((office) => {
-                                    const isActing =
-                                        actionLoading === office.id;
-                                    return (
-                                        <tr
-                                            key={office.id}
-                                            className="group hover:bg-white/[0.025] transition-colors"
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-[12.5px] min-w-[600px]">
+                            <thead>
+                                <tr className="bg-white/[0.03]">
+                                    {tableColumns.map((col) => (
+                                        <th
+                                            key={col}
+                                            className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-white/35 border-b border-white/[0.08] uppercase tracking-[0.05em]`}
                                         >
-                                            {/* Office */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <div className="flex items-center gap-2.5">
-                                                    <div className="w-7 h-7 rounded-[6px] flex-shrink-0 flex items-center justify-center bg-[#1e2d44] border border-white/[0.08] text-[10px] font-medium text-white/55">
-                                                        {office.initials}
+                                            {col}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtered.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            className="px-4 py-12 text-center text-[13px] text-white/30"
+                                        >
+                                            <i className="ti ti-building-off text-[28px] block mb-2 mx-auto" />
+                                            {t("offices.noResults")}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filtered.map((office) => {
+                                        const isActing =
+                                            actionLoading === office.id;
+                                        return (
+                                            <tr
+                                                key={office.id}
+                                                className="group hover:bg-white/[0.025] transition-colors"
+                                            >
+                                                {/* Office */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="w-7 h-7 rounded-[6px] flex-shrink-0 flex items-center justify-center bg-[#1e2d44] border border-white/[0.08] text-[10px] font-medium text-white/55">
+                                                            {office.initials}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[12.5px] text-white">
+                                                                {office.name}
+                                                            </p>
+                                                            <p className="text-[10.5px] text-white/35">
+                                                                {office.city}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[12.5px] text-white">
-                                                            {office.name}
-                                                        </p>
-                                                        <p className="text-[10.5px] text-white/35">
-                                                            {office.city}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            {/* Coverage */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
-                                                {office.coverageArea}
-                                            </td>
-                                            {/* Plan */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <Badge
-                                                    variant={
-                                                        planBadge[office.plan]
-                                                    }
-                                                >
-                                                    {office.plan
-                                                        .charAt(0)
-                                                        .toUpperCase() +
-                                                        office.plan.slice(1)}
-                                                </Badge>
-                                            </td>
-                                            {/* Orders */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
-                                                {office.orders.toLocaleString()}
-                                            </td>
-                                            {/* Rating */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <StarRating
-                                                    rating={office.rating}
-                                                />
-                                            </td>
-                                            {/* Status */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <Badge
-                                                    variant={
-                                                        statusBadge[
-                                                            office.status
-                                                        ]
-                                                    }
-                                                >
-                                                    {office.status
-                                                        .charAt(0)
-                                                        .toUpperCase() +
-                                                        office.status.slice(1)}
-                                                </Badge>
-                                            </td>
-                                            {/* Actions */}
-                                            <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
-                                                <div className="flex items-center gap-2">
-                                                    {/* View */}
-                                                    <button
-                                                        onClick={() =>
-                                                            setViewOfficeId(
-                                                                office.id,
-                                                            )
+                                                </td>
+                                                {/* Coverage */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
+                                                    {office.coverageArea}
+                                                </td>
+                                                {/* Plan */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <Badge
+                                                        variant={
+                                                            planBadge[
+                                                                office.plan
+                                                            ]
                                                         }
-                                                        title="View details"
-                                                        className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-colors"
                                                     >
-                                                        <i className="ti ti-eye text-[15px]" />
-                                                    </button>
+                                                        {t(
+                                                            `offices.${office.plan}`,
+                                                        )}
+                                                    </Badge>
+                                                </td>
+                                                {/* Orders */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
+                                                    {office.orders.toLocaleString()}
+                                                </td>
+                                                {/* Rating */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <StarRating
+                                                        rating={office.rating}
+                                                    />
+                                                </td>
+                                                {/* Status */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <Badge
+                                                        variant={
+                                                            statusBadge[
+                                                                office.status
+                                                            ]
+                                                        }
+                                                    >
+                                                        {t(
+                                                            `offices.${office.status}`,
+                                                        )}
+                                                    </Badge>
+                                                </td>
+                                                {/* Actions */}
+                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                    <div className="flex items-center gap-2">
+                                                        {/* View */}
+                                                        <button
+                                                            onClick={() =>
+                                                                setViewOfficeId(
+                                                                    office.id,
+                                                                )
+                                                            }
+                                                            title={t(
+                                                                "offices.viewDetails",
+                                                            )}
+                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-colors"
+                                                        >
+                                                            <i className="ti ti-eye text-[15px]" />
+                                                        </button>
 
-                                                    {isActing ? (
-                                                        <Spinner
-                                                            size="sm"
-                                                            className="mx-1"
-                                                        />
-                                                    ) : office.status ===
-                                                      "pending" ? (
-                                                        /* Approve */
-                                                        <button
-                                                            onClick={() =>
-                                                                handleApprove(
-                                                                    office.id,
-                                                                )
-                                                            }
-                                                            title="Approve office"
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-green-400 hover:bg-green-500/10 transition-colors"
-                                                        >
-                                                            <i className="ti ti-circle-check text-[15px]" />
-                                                        </button>
-                                                    ) : office.status ===
-                                                      "active" ? (
-                                                        /* Suspend */
-                                                        <button
-                                                            onClick={() =>
-                                                                handleToggle(
-                                                                    office.id,
-                                                                    office.status,
-                                                                )
-                                                            }
-                                                            title="Suspend office"
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                                                        >
-                                                            <i className="ti ti-ban text-[15px]" />
-                                                        </button>
-                                                    ) : (
-                                                        /* Restore */
-                                                        <button
-                                                            onClick={() =>
-                                                                handleToggle(
-                                                                    office.id,
-                                                                    office.status,
-                                                                )
-                                                            }
-                                                            title="Restore office"
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
-                                                        >
-                                                            <i className="ti ti-refresh text-[15px]" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
+                                                        {isActing ? (
+                                                            <Spinner
+                                                                size="sm"
+                                                                className="mx-1"
+                                                            />
+                                                        ) : office.status ===
+                                                          "pending" ? (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleApprove(
+                                                                        office.id,
+                                                                    )
+                                                                }
+                                                                title={t(
+                                                                    "offices.approve",
+                                                                )}
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-green-400 hover:bg-green-500/10 transition-colors"
+                                                            >
+                                                                <i className="ti ti-circle-check text-[15px]" />
+                                                            </button>
+                                                        ) : office.status ===
+                                                          "active" ? (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleToggle(
+                                                                        office.id,
+                                                                        office.status,
+                                                                    )
+                                                                }
+                                                                title={t(
+                                                                    "offices.suspend",
+                                                                )}
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                            >
+                                                                <i className="ti ti-ban text-[15px]" />
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleToggle(
+                                                                        office.id,
+                                                                        office.status,
+                                                                    )
+                                                                }
+                                                                title={t(
+                                                                    "offices.restore",
+                                                                )}
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                                            >
+                                                                <i className="ti ti-refresh text-[15px]" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            {/* ── Modals ──────────────────────────────────────────────────────── */}
-            {showAddModal && (
-                <AddOfficeModal
-                    onClose={() => setShowAddModal(false)}
-                    onSubmit={handleAdd}
-                    saving={actionLoading === "new"}
-                />
-            )}
+            {/* View modal */}
             {viewOfficeId && (
                 <ViewOfficeModal
                     officeId={viewOfficeId}
