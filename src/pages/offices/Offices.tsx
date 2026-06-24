@@ -12,6 +12,18 @@ import type { OfficeStatus, OfficePlan } from "../../types/office";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
 import { Spinner } from "../../components/ui/Spinner";
+import {
+    Eye,
+    Ban,
+    RefreshCw,
+    CircleCheck,
+    Search,
+    X,
+    Store,
+    Star,
+    AlertCircle,
+    Building2,
+} from "lucide-react";
 
 // ─── Badge maps ───────────────────────────────────────────────────────────────
 const planBadge: Record<
@@ -36,14 +48,16 @@ const statusBadge: Record<
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => (
     <div className="flex items-center gap-[2px]">
         {[1, 2, 3, 4, 5].map((star) => (
-            <i
+            <Star
                 key={star}
-                className="ti ti-star-filled text-[12px]"
+                size={12}
                 style={{
+                    fill:
+                        star <= Math.round(rating) ? "#f59e0b" : "transparent",
                     color:
                         star <= Math.round(rating)
-                            ? "var(--amber, #f59e0b)"
-                            : "rgba(255,255,255,0.12)",
+                            ? "#f59e0b"
+                            : "var(--border-color)",
                 }}
             />
         ))}
@@ -82,31 +96,31 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            <div className="w-full sm:max-w-sm sm:mx-4 bg-[#131d2e] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-black/60">
+            <div className="w-full sm:max-w-sm sm:mx-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-black/20">
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
-                    <h2 className="font-['Syne',sans-serif] text-[15px] font-semibold text-white">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-color)]">
+                    <h2 className="font-['Syne',sans-serif] text-[15px] font-semibold text-[var(--text-primary)]">
                         {t("offices.officeDetails")}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] transition-colors"
                     >
-                        <i className="ti ti-x text-[16px]" />
+                        <X size={15} />
                     </button>
                 </div>
 
                 {/* Body */}
                 <div className="px-5 py-5">
                     <div className="flex items-center gap-3 mb-5">
-                        <div className="w-12 h-12 rounded-xl bg-blue-600/15 border border-blue-500/25 flex items-center justify-center text-[15px] font-semibold text-blue-400">
+                        <div className="w-12 h-12 rounded-xl bg-blue-600/15 border border-blue-500/25 flex items-center justify-center text-[15px] font-semibold text-blue-500 dark:text-blue-400">
                             {office.initials}
                         </div>
                         <div>
-                            <p className="text-[14px] font-semibold text-white">
+                            <p className="text-[14px] font-semibold text-[var(--text-primary)]">
                                 {office.name}
                             </p>
-                            <p className="text-[11.5px] text-white/40 mt-0.5">
+                            <p className="text-[11.5px] text-[var(--text-muted)] mt-0.5">
                                 {office.city}
                             </p>
                         </div>
@@ -120,16 +134,16 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
                         </div>
                     </div>
 
-                    <div className="border border-white/[0.07] rounded-xl overflow-hidden">
+                    <div className="border border-[var(--border-color)] rounded-xl overflow-hidden">
                         {fields.map(({ label, value }) => (
                             <div
                                 key={label}
-                                className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07] last:border-none"
+                                className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] last:border-none"
                             >
-                                <span className="text-[11.5px] text-white/40">
+                                <span className="text-[11.5px] text-[var(--text-muted)]">
                                     {label}
                                 </span>
-                                <span className="text-[12.5px] text-white">
+                                <span className="text-[12.5px] text-[var(--text-primary)]">
                                     {value}
                                 </span>
                             </div>
@@ -140,7 +154,7 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
                 <div className="px-5 pb-5">
                     <button
                         onClick={onClose}
-                        className="w-full py-2 rounded-lg text-[12.5px] text-white/55 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] transition-colors"
+                        className="w-full py-2 rounded-lg text-[12.5px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.09] transition-colors"
                     >
                         {t("offices.close")}
                     </button>
@@ -152,7 +166,9 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => (
-    <div className={`bg-white/[0.06] rounded-lg animate-pulse ${className}`} />
+    <div
+        className={`bg-black/[0.06] dark:bg-white/[0.06] rounded-lg animate-pulse ${className}`}
+    />
 );
 
 const OfficesSkeleton = () => (
@@ -190,7 +206,6 @@ const Offices: React.FC = () => {
         dispatch(fetchOffices());
     }, [dispatch]);
 
-    // Debounced search
     useEffect(() => {
         const id = setTimeout(() => dispatch(setSearch(localSearch)), 250);
         return () => clearTimeout(id);
@@ -215,7 +230,6 @@ const Offices: React.FC = () => {
     const handleToggle = (id: string, s: OfficeStatus) =>
         dispatch(toggleOfficeStatus({ id, currentStatus: s }));
 
-    // ── Status filter tabs ──
     const statusTabs = [
         { key: "all" as const, label: t("offices.all") },
         { key: "active" as const, label: t("offices.active") },
@@ -223,7 +237,6 @@ const Offices: React.FC = () => {
         { key: "suspended" as const, label: t("offices.suspended") },
     ];
 
-    // ── Table columns ──
     const tableColumns = [
         t("offices.office"),
         t("offices.coverageArea"),
@@ -234,12 +247,11 @@ const Offices: React.FC = () => {
         t("offices.actions"),
     ];
 
-    // ── Error state ──
     if (error && !offices.length) {
         return (
             <div className="flex flex-col items-center justify-center h-64 gap-3 text-center">
-                <i className="ti ti-alert-circle text-[32px] text-red-400" />
-                <p className="text-white/70 text-sm">{error}</p>
+                <AlertCircle size={32} className="text-red-400" />
+                <p className="text-[var(--text-secondary)] text-sm">{error}</p>
                 <button
                     onClick={() => dispatch(fetchOffices())}
                     className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
@@ -250,7 +262,6 @@ const Offices: React.FC = () => {
         );
     }
 
-    // ── Loading state ──
     if (loading && !offices.length) return <OfficesSkeleton />;
 
     return (
@@ -258,11 +269,11 @@ const Offices: React.FC = () => {
             <div className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
                 {/* ── Title ─────────────────────────────────────────────── */}
                 <div className="flex items-baseline gap-2">
-                    <h1 className="font-['Syne',sans-serif] text-[18px] font-bold text-white">
+                    <h1 className="font-['Syne',sans-serif] text-[18px] font-bold text-[var(--text-primary)]">
                         {t("offices.title")}
                     </h1>
                     {stats && (
-                        <span className="text-[13px] text-white/35">
+                        <span className="text-[13px] text-[var(--text-muted)]">
                             — {stats.total} {t("offices.total")}
                         </span>
                     )}
@@ -276,51 +287,54 @@ const Offices: React.FC = () => {
                             value={stats.total.toString()}
                             subText={`↑ ${stats.monthTrend} ${t("offices.thisMonth")}`}
                             trend="up"
-                            icon="ti ti-building-store"
+                            icon={Store}
                         />
                         <StatCard
                             label={t("offices.verified")}
                             value={stats.verified.toString()}
                             subText={`${stats.pendingReview} ${t("offices.pendingReview")}`}
                             trend="neutral"
-                            icon="ti ti-circle-check"
+                            icon={CircleCheck}
                         />
                         <StatCard
                             label={t("offices.avgRating")}
                             value={stats.avgRating.toFixed(1)}
                             subText={t("offices.platformAverage")}
                             trend="neutral"
-                            icon="ti ti-star"
+                            icon={Star}
                         />
                     </div>
                 )}
 
                 {/* ── Table ─────────────────────────────────────────────── */}
-                <div className="bg-[#131d2e] border border-white/[0.08] rounded-[10px] overflow-hidden">
+                <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[10px] overflow-hidden">
                     {/* Toolbar */}
-                    <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-white/[0.08]">
+                    <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-[var(--border-color)]">
                         {/* Search */}
-                        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-[6px] w-full sm:w-[220px]">
-                            <i className="ti ti-search text-[15px] text-white/35 flex-shrink-0" />
+                        <div className="flex items-center gap-2 bg-black/[0.04] dark:bg-white/[0.05] border border-[var(--border-color)] rounded-lg px-3 py-[6px] w-full sm:w-[220px]">
+                            <Search
+                                size={14}
+                                className="text-[var(--text-muted)] flex-shrink-0"
+                            />
                             <input
                                 type="text"
                                 placeholder={t("offices.searchPlaceholder")}
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
-                                className="bg-transparent border-none outline-none text-[12.5px] text-white placeholder:text-white/30 w-full font-['DM_Sans',sans-serif]"
+                                className="bg-transparent border-none outline-none text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-full font-['DM_Sans',sans-serif]"
                             />
                             {localSearch && (
                                 <button
                                     onClick={() => setLocalSearch("")}
-                                    className="text-white/30 hover:text-white/60"
+                                    className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                                 >
-                                    <i className="ti ti-x text-[13px]" />
+                                    <X size={13} />
                                 </button>
                             )}
                         </div>
 
                         {/* Status filter */}
-                        <div className="flex items-center gap-1 bg-white/[0.05] border border-white/[0.08] rounded-lg p-1">
+                        <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.05] border border-[var(--border-color)] rounded-lg p-1">
                             {statusTabs.map(({ key, label }) => (
                                 <button
                                     key={key}
@@ -328,14 +342,18 @@ const Offices: React.FC = () => {
                                         dispatch(setStatusFilter(key))
                                     }
                                     className={`px-3 py-1 rounded-md text-[11.5px] transition-colors
-                                        ${statusFilter === key ? "bg-white/[0.10] text-white" : "text-white/40 hover:text-white/70"}`}
+                                        ${
+                                            statusFilter === key
+                                                ? "bg-black/[0.08] dark:bg-white/[0.10] text-[var(--text-primary)]"
+                                                : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                                        }`}
                                 >
                                     {label}
                                 </button>
                             ))}
                         </div>
 
-                        <span className="text-[11.5px] text-white/30">
+                        <span className="text-[11.5px] text-[var(--text-muted)]">
                             {filtered.length}{" "}
                             {filtered.length !== 1
                                 ? t("offices.results")
@@ -347,11 +365,11 @@ const Offices: React.FC = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-[12.5px] min-w-[600px]">
                             <thead>
-                                <tr className="bg-white/[0.03]">
+                                <tr className="bg-black/[0.02] dark:bg-white/[0.03]">
                                     {tableColumns.map((col) => (
                                         <th
                                             key={col}
-                                            className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-white/35 border-b border-white/[0.08] uppercase tracking-[0.05em]`}
+                                            className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-[var(--text-muted)] border-b border-[var(--border-color)] uppercase tracking-[0.05em]`}
                                         >
                                             {col}
                                         </th>
@@ -363,9 +381,12 @@ const Offices: React.FC = () => {
                                     <tr>
                                         <td
                                             colSpan={7}
-                                            className="px-4 py-12 text-center text-[13px] text-white/30"
+                                            className="px-4 py-12 text-center text-[13px] text-[var(--text-muted)]"
                                         >
-                                            <i className="ti ti-building-off text-[28px] block mb-2 mx-auto" />
+                                            <Building2
+                                                size={28}
+                                                className="block mb-2 mx-auto opacity-40"
+                                            />
                                             {t("offices.noResults")}
                                         </td>
                                     </tr>
@@ -376,30 +397,30 @@ const Offices: React.FC = () => {
                                         return (
                                             <tr
                                                 key={office.id}
-                                                className="group hover:bg-white/[0.025] transition-colors"
+                                                className="group hover:bg-black/[0.02] dark:hover:bg-white/[0.025] transition-colors"
                                             >
                                                 {/* Office */}
-                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                                                     <div className="flex items-center gap-2.5">
-                                                        <div className="w-7 h-7 rounded-[6px] flex-shrink-0 flex items-center justify-center bg-[#1e2d44] border border-white/[0.08] text-[10px] font-medium text-white/55">
+                                                        <div className="w-7 h-7 rounded-[6px] flex-shrink-0 flex items-center justify-center bg-black/[0.05] dark:bg-white/[0.06] border border-[var(--border-color)] text-[10px] font-medium text-[var(--text-secondary)]">
                                                             {office.initials}
                                                         </div>
                                                         <div>
-                                                            <p className="text-[12.5px] text-white">
+                                                            <p className="text-[12.5px] text-[var(--text-primary)]">
                                                                 {office.name}
                                                             </p>
-                                                            <p className="text-[10.5px] text-white/35">
+                                                            <p className="text-[10.5px] text-[var(--text-muted)]">
                                                                 {office.city}
                                                             </p>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 {/* Coverage */}
-                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
+                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] text-[var(--text-secondary)]">
                                                     {office.coverageArea}
                                                 </td>
                                                 {/* Plan */}
-                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                                                     <Badge
                                                         variant={
                                                             planBadge[
@@ -413,17 +434,17 @@ const Offices: React.FC = () => {
                                                     </Badge>
                                                 </td>
                                                 {/* Orders */}
-                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08] text-white/85">
+                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] text-[var(--text-secondary)]">
                                                     {office.orders.toLocaleString()}
                                                 </td>
                                                 {/* Rating */}
-                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                                                     <StarRating
                                                         rating={office.rating}
                                                     />
                                                 </td>
                                                 {/* Status */}
-                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                                                     <Badge
                                                         variant={
                                                             statusBadge[
@@ -437,9 +458,8 @@ const Offices: React.FC = () => {
                                                     </Badge>
                                                 </td>
                                                 {/* Actions */}
-                                                <td className="px-3.5 py-2.5 border-b border-white/[0.08]">
+                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                                                     <div className="flex items-center gap-2">
-                                                        {/* View */}
                                                         <button
                                                             onClick={() =>
                                                                 setViewOfficeId(
@@ -449,9 +469,9 @@ const Offices: React.FC = () => {
                                                             title={t(
                                                                 "offices.viewDetails",
                                                             )}
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-colors"
+                                                            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] transition-colors"
                                                         >
-                                                            <i className="ti ti-eye text-[15px]" />
+                                                            <Eye size={15} />
                                                         </button>
 
                                                         {isActing ? (
@@ -470,9 +490,11 @@ const Offices: React.FC = () => {
                                                                 title={t(
                                                                     "offices.approve",
                                                                 )}
-                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-green-400 hover:bg-green-500/10 transition-colors"
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-green-500 hover:bg-green-500/10 transition-colors"
                                                             >
-                                                                <i className="ti ti-circle-check text-[15px]" />
+                                                                <CircleCheck
+                                                                    size={15}
+                                                                />
                                                             </button>
                                                         ) : office.status ===
                                                           "active" ? (
@@ -486,9 +508,11 @@ const Offices: React.FC = () => {
                                                                 title={t(
                                                                     "offices.suspend",
                                                                 )}
-                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
                                                             >
-                                                                <i className="ti ti-ban text-[15px]" />
+                                                                <Ban
+                                                                    size={15}
+                                                                />
                                                             </button>
                                                         ) : (
                                                             <button
@@ -501,9 +525,11 @@ const Offices: React.FC = () => {
                                                                 title={t(
                                                                     "offices.restore",
                                                                 )}
-                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-blue-500 hover:bg-blue-500/10 transition-colors"
                                                             >
-                                                                <i className="ti ti-refresh text-[15px]" />
+                                                                <RefreshCw
+                                                                    size={15}
+                                                                />
                                                             </button>
                                                         )}
                                                     </div>
@@ -518,7 +544,6 @@ const Offices: React.FC = () => {
                 </div>
             </div>
 
-            {/* View modal */}
             {viewOfficeId && (
                 <ViewOfficeModal
                     officeId={viewOfficeId}

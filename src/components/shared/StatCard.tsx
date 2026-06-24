@@ -1,35 +1,44 @@
 import React from "react";
-import type { StatCardData } from "../../types/dashboard";
+import type { LucideIcon } from "lucide-react";
 
-interface StatCardProps extends StatCardData {}
+interface StatCardData {
+    label: string;
+    value: string;
+    subText: string;
+    trend: "up" | "down" | "neutral";
+    icon: LucideIcon;
+}
 
 const trendClass = {
-    up: "text-green-400",
-    down: "text-red-400",
-    neutral: "text-white/55",
+    up: "text-green-600 dark:text-green-400",
+    down: "text-red-500 dark:text-red-400",
+    neutral: "text-[var(--text-muted)]",
 };
 
-export const StatCard: React.FC<StatCardProps> = ({
+export const StatCard: React.FC<StatCardData> = ({
     label,
     value,
     subText,
     trend,
-    icon,
+    icon: Icon,
 }) => (
     <div
         className="
-    bg-[#131d2e] border border-white/[0.08] rounded-[10px] p-[0.95rem_1.1rem]
-    hover:border-white/[0.14] transition-colors duration-150
-  "
+            bg-[var(--bg-secondary)]
+            border border-[var(--border-color)]
+            hover:border-black/20 dark:hover:border-white/[0.14]
+            rounded-[10px] p-[0.95rem_1.1rem]
+            transition-colors duration-150
+        "
     >
         {/* Label row */}
-        <div className="flex items-center gap-1.5 text-[11px] text-white/35 mb-[7px]">
-            <i className={`${icon} text-[14px]`} />
+        <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] mb-[7px]">
+            <Icon size={14} />
             {label}
         </div>
 
         {/* Value */}
-        <div className="font-['Syne',sans-serif] text-[23px] font-bold text-white leading-none">
+        <div className="font-['Syne',sans-serif] text-[23px] font-bold text-[var(--text-primary)] leading-none">
             {value}
         </div>
 

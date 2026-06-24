@@ -1,5 +1,5 @@
 export type UserRole = "customer" | "driver";
-export type UserStatus = "active" | "inactive" | "suspended";
+export type UserStatus = "active" | "suspended";
 
 export interface User {
     id: string;
@@ -17,7 +17,7 @@ export interface UsersStats {
     total: number;
     active: number;
     suspended: number;
-    weekTrend: number; // % change this week
+    weekTrend: number;
     newSuspendedThisWeek: number;
 }
 
