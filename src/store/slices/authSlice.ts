@@ -50,6 +50,7 @@ const authSlice = createSlice({
         state.admin = action.payload.admin;
         state.token = action.payload.token;
         localStorage.setItem("admin", JSON.stringify(action.payload.admin));
+        localStorage.setItem("token", action.payload.token); // ← ضيف الس طر ده
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
