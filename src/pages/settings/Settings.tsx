@@ -34,7 +34,7 @@ const Toggle: React.FC<{ checked: boolean; onChange: () => void }> = ({
         aria-checked={checked}
         onClick={onChange}
         className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 flex-shrink-0
-      ${checked ? "bg-blue-600" : "bg-white/[0.12]"}`}
+      ${checked ? "bg-blue-600" : "bg-black/[0.12] dark:bg-white/[0.12]"}`}
     >
         <span
             className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow-md transition-all duration-200
@@ -54,7 +54,7 @@ const NumInput: React.FC<{
 }> = ({ value, onChange, prefix, suffix, min, max }) => (
     <div className="flex items-center gap-2">
         {prefix && (
-            <span className="text-[13px] text-white/40 font-medium">
+            <span className="text-[13px] text-[var(--text-muted)] font-medium">
                 {prefix}
             </span>
         )}
@@ -65,16 +65,16 @@ const NumInput: React.FC<{
             max={max}
             onChange={(e) => onChange(Number(e.target.value))}
             className="
-        w-[88px] bg-[#0b1120] border border-white/[0.10] rounded-lg
-        px-3 py-2 text-[13px] text-white text-right
-        outline-none focus:border-blue-500/60 focus:bg-[#0f1827] transition-all
+        w-[88px] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg
+        px-3 py-2 text-[13px] text-[var(--text-primary)] text-right
+        outline-none focus:border-blue-500/60 focus:bg-[var(--bg-secondary)] transition-all
         font-['DM_Sans',sans-serif]
         [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none
         [&::-webkit-inner-spin-button]:appearance-none
       "
         />
         {suffix && (
-            <span className="text-[13px] text-white/40 font-medium">
+            <span className="text-[13px] text-[var(--text-muted)] font-medium">
                 {suffix}
             </span>
         )}
@@ -91,13 +91,17 @@ const SectionHeader = ({
     title: string;
     desc: string;
 }) => (
-    <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.07]">
+    <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--border-color)]">
         <div className="w-8 h-8 rounded-lg bg-blue-600/15 border border-blue-500/20 flex items-center justify-center">
-            <Icon size={18} className="text-blue-400" />
+            <Icon size={18} className="text-blue-500 dark:text-blue-400" />
         </div>
         <div>
-            <p className="text-[13.5px] font-semibold text-white">{title}</p>
-            <p className="text-[11px] text-white/35 mt-0.5">{desc}</p>
+            <p className="text-[13.5px] font-semibold text-[var(--text-primary)]">
+                {title}
+            </p>
+            <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                {desc}
+            </p>
         </div>
     </div>
 );
@@ -110,11 +114,11 @@ const SettingRow: React.FC<{
 }> = ({ label, desc, control }) => (
     <div
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
-    px-5 py-4 border-b border-white/[0.06] last:border-none hover:bg-white/[0.02] transition-colors"
+    px-5 py-4 border-b border-[var(--border-color)] last:border-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
     >
         <div className="min-w-0">
-            <p className="text-[13px] text-white/90">{label}</p>
-            <p className="text-[11.5px] text-white/35 mt-0.5 leading-relaxed">
+            <p className="text-[13px] text-[var(--text-primary)]">{label}</p>
+            <p className="text-[11.5px] text-[var(--text-muted)] mt-0.5 leading-relaxed">
                 {desc}
             </p>
         </div>
@@ -124,7 +128,7 @@ const SettingRow: React.FC<{
 
 // ─── Card wrapper ─────────────────────────────────────────────────────────────
 const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div className="bg-[#131d2e] border border-white/[0.08] rounded-xl overflow-hidden">
+    <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl overflow-hidden">
         {children}
     </div>
 );
@@ -138,8 +142,8 @@ const SaveToast: React.FC<{ visible: boolean; message: string }> = ({
         className={`
     fixed bottom-6 left-1/2 -translate-x-1/2 z-50 whitespace-nowrap
     flex items-center gap-2 px-4 py-2.5 rounded-xl
-    bg-[#131d2e] border border-green-500/30 shadow-2xl shadow-black/50
-    text-[12.5px] text-green-400 font-medium transition-all duration-300
+    bg-[var(--bg-secondary)] border border-green-500/30 shadow-2xl shadow-black/20 dark:shadow-black/50
+    text-[12.5px] text-green-600 dark:text-green-400 font-medium transition-all duration-300
     ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"}
   `}
     >
@@ -204,10 +208,10 @@ const Settings: React.FC = () => {
                 {/* ── Page title ──────────────────────────────────────────────── */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="font-['Syne',sans-serif] text-[20px] font-bold text-white">
+                        <h1 className="font-['Syne',sans-serif] text-[20px] font-bold text-[var(--text-primary)]">
                             {t("settings.title")}
                         </h1>
-                        <p className="text-[12.5px] text-white/35 mt-0.5">
+                        <p className="text-[12.5px] text-[var(--text-muted)] mt-0.5">
                             {t("settings.subtitle")}
                         </p>
                     </div>
@@ -351,7 +355,7 @@ const Settings: React.FC = () => {
                             <div
                                 key={admin.id}
                                 className="flex items-center justify-between px-5 py-4
-                  border-b border-white/[0.06] last:border-none hover:bg-white/[0.02] transition-colors"
+                  border-b border-[var(--border-color)] last:border-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
                             >
                                 <div className="flex items-center gap-3 min-w-0">
                                     <Avatar
@@ -359,10 +363,10 @@ const Settings: React.FC = () => {
                                         size="md"
                                     />
                                     <div className="min-w-0">
-                                        <p className="text-[13px] text-white/90">
+                                        <p className="text-[13px] text-[var(--text-primary)]">
                                             {admin.name}
                                         </p>
-                                        <p className="text-[11px] text-white/35 mt-0.5 truncate">
+                                        <p className="text-[11px] text-[var(--text-muted)] mt-0.5 truncate">
                                             {admin.email} ·{" "}
                                             {admin.role === "super_admin"
                                                 ? t("settings.superAdmin")
@@ -379,7 +383,7 @@ const Settings: React.FC = () => {
                                         onClick={() => removeAdmin(admin.id)}
                                         title={t("settings.removeAdmin")}
                                         className="w-7 h-7 flex items-center justify-center rounded-lg
-                      text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors flex-shrink-0"
+                      text-[var(--text-muted)] hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors flex-shrink-0"
                                     >
                                         <i className="ti ti-trash text-[15px]" />
                                     </button>

@@ -17,7 +17,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         <div
             className={`
         ${sizeClass} rounded-full flex-shrink-0 flex items-center justify-center
-        bg-[#1e2d44] border border-white/[0.08] font-medium text-white/55
+        bg-black/[0.06] dark:bg-white/[0.08] border border-[var(--border-color)] font-medium text-[var(--text-secondary)]
         ${className}
       `}
         >
