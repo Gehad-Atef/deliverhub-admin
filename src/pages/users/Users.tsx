@@ -1,11 +1,7 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
-import {
-    fetchUsers,
-    toggleUserStatus,
-    setSearch,
-} from "../../store/slices/usersSlice";
+import { fetchUsers, toggleUserStatus } from "../../store/slices/usersSlice";
 import type { UserStatus } from "../../types/user";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
@@ -150,33 +146,24 @@ const UsersSkeleton = () => (
 const Users: React.FC = () => {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
-    const { users, stats, loading, actionLoading, error, search } =
+    const { users, stats, pagination, loading, actionLoading, error } =
         useAppSelector((s) => s.users);
 
     const [viewUserId, setViewUserId] = useState<string | null>(null);
     const [localSearch, setLocalSearch] = useState("");
 
+    // جلب أول مرة
     useEffect(() => {
-        dispatch(fetchUsers());
+        dispatch(fetchUsers({ page: 1, limit: 20 }));
     }, [dispatch]);
 
+    // الـ search بيبعت للباك إند مع debounce
     useEffect(() => {
-        const id = setTimeout(() => dispatch(setSearch(localSearch)), 250);
+        const id = setTimeout(() => {
+            dispatch(fetchUsers({ page: 1, limit: 20, search: localSearch }));
+        }, 400);
         return () => clearTimeout(id);
     }, [localSearch, dispatch]);
-
-    const filtered = useMemo(
-        () =>
-            users.filter((u) => {
-                const matchSearch =
-                    !search ||
-                    u.name.toLowerCase().includes(search.toLowerCase()) ||
-                    u.email.toLowerCase().includes(search.toLowerCase()) ||
-                    u.phone.includes(search);
-                return matchSearch;
-            }),
-        [users, search],
-    );
 
     const handleToggle = (id: string, status: UserStatus) =>
         dispatch(toggleUserStatus({ id, currentStatus: status }));
@@ -188,7 +175,7 @@ const Users: React.FC = () => {
                 <AlertCircle size={32} className="text-red-400" />
                 <p className="text-[var(--text-secondary)] text-sm">{error}</p>
                 <button
-                    onClick={() => dispatch(fetchUsers())}
+                    onClick={() => dispatch(fetchUsers({ page: 1, limit: 20 }))}
                     className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
                 >
                     Retry
@@ -285,12 +272,14 @@ const Users: React.FC = () => {
                         </div>
 
                         {/* Count */}
-                        <span className="text-[11.5px] text-[var(--text-muted)]">
-                            {filtered.length}{" "}
-                            {filtered.length !== 1
-                                ? t("users.results")
-                                : t("users.result")}
-                        </span>
+                        {pagination && (
+                            <span className="text-[11.5px] text-[var(--text-muted)]">
+                                {pagination.total}{" "}
+                                {pagination.total !== 1
+                                    ? t("users.results")
+                                    : t("users.result")}
+                            </span>
+                        )}
                     </div>
 
                     {/* Table */}
@@ -316,7 +305,7 @@ const Users: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.length === 0 ? (
+                                {users.length === 0 ? (
                                     <tr>
                                         <td
                                             colSpan={6}
@@ -330,7 +319,7 @@ const Users: React.FC = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filtered.map((user) => {
+                                    users.map((user) => {
                                         const isActing =
                                             actionLoading === user.id;
                                         return (
@@ -451,6 +440,51 @@ const Users: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination */}
+                    {pagination && pagination.pages > 1 && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)]">
+                            <span className="text-[11.5px] text-[var(--text-muted)]">
+                                {t("users.page")} {pagination.page} /{" "}
+                                {pagination.pages}
+                            </span>
+                            <div className="flex gap-1.5">
+                                <button
+                                    disabled={pagination.page <= 1 || loading}
+                                    onClick={() =>
+                                        dispatch(
+                                            fetchUsers({
+                                                page: pagination.page - 1,
+                                                limit: pagination.limit,
+                                                search: localSearch,
+                                            }),
+                                        )
+                                    }
+                                    className="px-3 py-1.5 rounded-lg text-[11.5px] text-[var(--text-secondary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {t("users.prev")}
+                                </button>
+                                <button
+                                    disabled={
+                                        pagination.page >= pagination.pages ||
+                                        loading
+                                    }
+                                    onClick={() =>
+                                        dispatch(
+                                            fetchUsers({
+                                                page: pagination.page + 1,
+                                                limit: pagination.limit,
+                                                search: localSearch,
+                                            }),
+                                        )
+                                    }
+                                    className="px-3 py-1.5 rounded-lg text-[11.5px] text-[var(--text-secondary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {t("users.next")}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

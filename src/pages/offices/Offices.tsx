@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
     fetchOffices,
-    approveOffice,
     toggleOfficeStatus,
-    setSearch,
     setStatusFilter,
 } from "../../store/slices/officesSlice";
-import type { OfficeStatus, OfficePlan } from "../../types/office";
+import type { OfficeStatus } from "../../types/office";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
 import { Spinner } from "../../components/ui/Spinner";
@@ -16,7 +14,6 @@ import {
     Eye,
     Ban,
     RefreshCw,
-    CircleCheck,
     Search,
     X,
     Store,
@@ -25,22 +22,12 @@ import {
     Building2,
 } from "lucide-react";
 
-// ─── Badge maps ───────────────────────────────────────────────────────────────
-const planBadge: Record<
-    OfficePlan,
-    React.ComponentProps<typeof Badge>["variant"]
-> = {
-    basic: "gray",
-    premium: "blue",
-    featured: "amber",
-};
-
+// ─── Badge map ────────────────────────────────────────────────────────────────
 const statusBadge: Record<
     OfficeStatus,
     React.ComponentProps<typeof Badge>["variant"]
 > = {
     active: "green",
-    pending: "amber",
     suspended: "red",
 };
 
@@ -79,7 +66,7 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
     const fields = [
         { label: t("auth.email"), value: office.email },
         { label: t("users.phone"), value: office.phone },
-        { label: t("offices.coverageArea"), value: office.coverageArea },
+        { label: t("offices.address"), value: office.address || "—" },
         { label: t("users.orders"), value: office.orders.toLocaleString() },
         {
             label: t("offices.rating"),
@@ -120,16 +107,10 @@ const ViewOfficeModal: React.FC<{ officeId: string; onClose: () => void }> = ({
                             <p className="text-[14px] font-semibold text-[var(--text-primary)]">
                                 {office.name}
                             </p>
-                            <p className="text-[11.5px] text-[var(--text-muted)] mt-0.5">
-                                {office.city}
-                            </p>
                         </div>
-                        <div className="ml-auto flex flex-col items-end gap-1">
+                        <div className="ml-auto">
                             <Badge variant={statusBadge[office.status]}>
                                 {t(`offices.${office.status}`)}
-                            </Badge>
-                            <Badge variant={planBadge[office.plan]}>
-                                {t(`offices.${office.plan}`)}
                             </Badge>
                         </div>
                     </div>
@@ -187,61 +168,67 @@ const OfficesSkeleton = () => (
 const Offices: React.FC = () => {
     const { t, i18n } = useTranslation();
     const isRTL = i18n.language === "ar";
-
     const dispatch = useAppDispatch();
+
     const {
-        offices = [],
-        stats = null,
-        loading = false,
-        actionLoading = null,
-        error = null,
-        search = "",
-        statusFilter = "all",
-    } = useAppSelector((s) => s.offices) ?? {};
+        offices,
+        stats,
+        pagination,
+        loading,
+        actionLoading,
+        error,
+        statusFilter,
+    } = useAppSelector((s) => s.offices);
 
     const [viewOfficeId, setViewOfficeId] = useState<string | null>(null);
     const [localSearch, setLocalSearch] = useState("");
 
+    // جلب أول مرة
     useEffect(() => {
-        dispatch(fetchOffices());
+        dispatch(fetchOffices({ page: 1, limit: 20 }));
     }, [dispatch]);
 
+    // search مع debounce — بيبعت للباك إند
     useEffect(() => {
-        const id = setTimeout(() => dispatch(setSearch(localSearch)), 250);
+        const id = setTimeout(() => {
+            dispatch(
+                fetchOffices({
+                    page: 1,
+                    limit: 20,
+                    search: localSearch,
+                    status: statusFilter,
+                }),
+            );
+        }, 400);
         return () => clearTimeout(id);
     }, [localSearch, dispatch]);
 
-    const filtered = useMemo(
-        () =>
-            offices.filter((o) => {
-                const matchStatus =
-                    statusFilter === "all" || o.status === statusFilter;
-                const matchSearch =
-                    !search ||
-                    o.name.toLowerCase().includes(search.toLowerCase()) ||
-                    o.city.toLowerCase().includes(search.toLowerCase()) ||
-                    o.coverageArea.toLowerCase().includes(search.toLowerCase());
-                return matchStatus && matchSearch;
+    // status filter — بيبعت للباك إند فوراً
+    const handleStatusFilter = (key: "all" | OfficeStatus) => {
+        dispatch(setStatusFilter(key));
+        dispatch(
+            fetchOffices({
+                page: 1,
+                limit: 20,
+                search: localSearch,
+                status: key,
             }),
-        [offices, search, statusFilter],
-    );
+        );
+    };
 
-    const handleApprove = (id: string) => dispatch(approveOffice(id));
     const handleToggle = (id: string, s: OfficeStatus) =>
         dispatch(toggleOfficeStatus({ id, currentStatus: s }));
 
     const statusTabs = [
         { key: "all" as const, label: t("offices.all") },
         { key: "active" as const, label: t("offices.active") },
-        { key: "pending" as const, label: t("offices.pending") },
         { key: "suspended" as const, label: t("offices.suspended") },
     ];
 
     const tableColumns = [
         t("offices.office"),
-        t("offices.coverageArea"),
-        t("offices.plan"),
-        t("offices.orders"),
+        t("offices.address"),
+        t("users.orders"),
         t("offices.rating"),
         t("offices.status"),
         t("offices.actions"),
@@ -253,7 +240,9 @@ const Offices: React.FC = () => {
                 <AlertCircle size={32} className="text-red-400" />
                 <p className="text-[var(--text-secondary)] text-sm">{error}</p>
                 <button
-                    onClick={() => dispatch(fetchOffices())}
+                    onClick={() =>
+                        dispatch(fetchOffices({ page: 1, limit: 20 }))
+                    }
                     className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
                 >
                     Retry
@@ -290,11 +279,11 @@ const Offices: React.FC = () => {
                             icon={Store}
                         />
                         <StatCard
-                            label={t("offices.verified")}
-                            value={stats.verified.toString()}
-                            subText={`${stats.pendingReview} ${t("offices.pendingReview")}`}
+                            label={t("offices.active")}
+                            value={stats.active.toString()}
+                            subText={`${stats.suspended} ${t("offices.suspended")}`}
                             trend="neutral"
-                            icon={CircleCheck}
+                            icon={Building2}
                         />
                         <StatCard
                             label={t("offices.avgRating")}
@@ -338,32 +327,31 @@ const Offices: React.FC = () => {
                             {statusTabs.map(({ key, label }) => (
                                 <button
                                     key={key}
-                                    onClick={() =>
-                                        dispatch(setStatusFilter(key))
-                                    }
-                                    className={`px-3 py-1 rounded-md text-[11.5px] transition-colors
-                                        ${
-                                            statusFilter === key
-                                                ? "bg-black/[0.08] dark:bg-white/[0.10] text-[var(--text-primary)]"
-                                                : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                                        }`}
+                                    onClick={() => handleStatusFilter(key)}
+                                    className={`px-3 py-1 rounded-md text-[11.5px] transition-colors ${
+                                        statusFilter === key
+                                            ? "bg-black/[0.08] dark:bg-white/[0.10] text-[var(--text-primary)]"
+                                            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                                    }`}
                                 >
                                     {label}
                                 </button>
                             ))}
                         </div>
 
-                        <span className="text-[11.5px] text-[var(--text-muted)]">
-                            {filtered.length}{" "}
-                            {filtered.length !== 1
-                                ? t("offices.results")
-                                : t("offices.result")}
-                        </span>
+                        {pagination && (
+                            <span className="text-[11.5px] text-[var(--text-muted)]">
+                                {pagination.total}{" "}
+                                {pagination.total !== 1
+                                    ? t("offices.results")
+                                    : t("offices.result")}
+                            </span>
+                        )}
                     </div>
 
                     {/* Table */}
                     <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-[12.5px] min-w-[600px]">
+                        <table className="w-full border-collapse text-[12.5px] min-w-[560px]">
                             <thead>
                                 <tr className="bg-black/[0.02] dark:bg-white/[0.03]">
                                     {tableColumns.map((col) => (
@@ -377,10 +365,10 @@ const Offices: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.length === 0 ? (
+                                {offices.length === 0 ? (
                                     <tr>
                                         <td
-                                            colSpan={7}
+                                            colSpan={6}
                                             className="px-4 py-12 text-center text-[13px] text-[var(--text-muted)]"
                                         >
                                             <Building2
@@ -391,7 +379,7 @@ const Offices: React.FC = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filtered.map((office) => {
+                                    offices.map((office) => {
                                         const isActing =
                                             actionLoading === office.id;
                                         return (
@@ -410,28 +398,14 @@ const Offices: React.FC = () => {
                                                                 {office.name}
                                                             </p>
                                                             <p className="text-[10.5px] text-[var(--text-muted)]">
-                                                                {office.city}
+                                                                {office.email}
                                                             </p>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                {/* Coverage */}
+                                                {/* Address */}
                                                 <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] text-[var(--text-secondary)]">
-                                                    {office.coverageArea}
-                                                </td>
-                                                {/* Plan */}
-                                                <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
-                                                    <Badge
-                                                        variant={
-                                                            planBadge[
-                                                                office.plan
-                                                            ]
-                                                        }
-                                                    >
-                                                        {t(
-                                                            `offices.${office.plan}`,
-                                                        )}
-                                                    </Badge>
+                                                    {office.address || "—"}
                                                 </td>
                                                 {/* Orders */}
                                                 <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] text-[var(--text-secondary)]">
@@ -480,23 +454,6 @@ const Offices: React.FC = () => {
                                                                 className="mx-1"
                                                             />
                                                         ) : office.status ===
-                                                          "pending" ? (
-                                                            <button
-                                                                onClick={() =>
-                                                                    handleApprove(
-                                                                        office.id,
-                                                                    )
-                                                                }
-                                                                title={t(
-                                                                    "offices.approve",
-                                                                )}
-                                                                className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-green-500 hover:bg-green-500/10 transition-colors"
-                                                            >
-                                                                <CircleCheck
-                                                                    size={15}
-                                                                />
-                                                            </button>
-                                                        ) : office.status ===
                                                           "active" ? (
                                                             <button
                                                                 onClick={() =>
@@ -541,6 +498,53 @@ const Offices: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination */}
+                    {pagination && pagination.pages > 1 && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)]">
+                            <span className="text-[11.5px] text-[var(--text-muted)]">
+                                {t("users.page")} {pagination.page} /{" "}
+                                {pagination.pages}
+                            </span>
+                            <div className="flex gap-1.5">
+                                <button
+                                    disabled={pagination.page <= 1 || loading}
+                                    onClick={() =>
+                                        dispatch(
+                                            fetchOffices({
+                                                page: pagination.page - 1,
+                                                limit: pagination.limit,
+                                                search: localSearch,
+                                                status: statusFilter,
+                                            }),
+                                        )
+                                    }
+                                    className="px-3 py-1.5 rounded-lg text-[11.5px] text-[var(--text-secondary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {t("users.prev")}
+                                </button>
+                                <button
+                                    disabled={
+                                        pagination.page >= pagination.pages ||
+                                        loading
+                                    }
+                                    onClick={() =>
+                                        dispatch(
+                                            fetchOffices({
+                                                page: pagination.page + 1,
+                                                limit: pagination.limit,
+                                                search: localSearch,
+                                                status: statusFilter,
+                                            }),
+                                        )
+                                    }
+                                    className="px-3 py-1.5 rounded-lg text-[11.5px] text-[var(--text-secondary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {t("users.next")}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
