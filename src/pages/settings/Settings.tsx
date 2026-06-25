@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "../../components/ui/Avatar";
 import { Badge } from "../../components/ui/Badge";
 import { Bell, ShieldCheck, Settings2 } from "lucide-react";
+
+const BASE_URL = "http://localhost:3000/api";
+const getToken = () => localStorage.getItem("token");
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface PlatformSettings {
@@ -112,10 +115,7 @@ const SettingRow: React.FC<{
     desc: string;
     control: React.ReactNode;
 }> = ({ label, desc, control }) => (
-    <div
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
-    px-5 py-4 border-b border-[var(--border-color)] last:border-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
-    >
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-b border-[var(--border-color)] last:border-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
         <div className="min-w-0">
             <p className="text-[13px] text-[var(--text-primary)]">{label}</p>
             <p className="text-[11.5px] text-[var(--text-muted)] mt-0.5 leading-relaxed">
@@ -126,7 +126,7 @@ const SettingRow: React.FC<{
     </div>
 );
 
-// ─── Card wrapper ─────────────────────────────────────────────────────────────
+// ─── Card ─────────────────────────────────────────────────────────────────────
 const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl overflow-hidden">
         {children}
@@ -152,60 +152,170 @@ const SaveToast: React.FC<{ visible: boolean; message: string }> = ({
     </div>
 );
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-const INITIAL_ADMINS: AdminAccount[] = [
-    {
-        id: "a1",
-        initials: "AD",
-        name: "Admin",
-        email: "admin@deliverhub.com",
-        role: "super_admin",
-        isYou: true,
-    },
-    {
-        id: "a2",
-        initials: "MH",
-        name: "Mohamed Hassan",
-        email: "m.hassan@deliverhub.com",
-        role: "moderator",
-        isYou: false,
-    },
-];
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => (
+    <div
+        className={`bg-black/[0.06] dark:bg-white/[0.06] rounded-lg animate-pulse ${className}`}
+    />
+);
 
+// ─── Main Page ────────────────────────────────────────────────────────────────
 const Settings: React.FC = () => {
     const { t, i18n } = useTranslation();
     const isRTL = i18n.language === "ar";
 
     const [platform, setPlatform] = useState<PlatformSettings>({
-        commissionRate: 7,
-        subscriptionFee: 49,
-        featuredListingFee: 19,
+        commissionRate: 0,
+        subscriptionFee: 0,
+        featuredListingFee: 0,
     });
     const [notifications, setNotifications] = useState<NotificationSettings>({
-        newDisputeAlerts: true,
+        newDisputeAlerts: false,
         newOfficeRegistrations: false,
         dailyRevenueReport: false,
     });
-    const [admins, setAdmins] = useState<AdminAccount[]>(INITIAL_ADMINS);
+    const [admins, setAdmins] = useState<AdminAccount[]>([]);
+    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [removingId, setRemovingId] = useState<string | null>(null);
     const [toastVisible, setToastVisible] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // ── جلب الـ settings والـ admins ─────────────────────────────────────────
+    useEffect(() => {
+        const fetchAll = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const [settingsRes, adminsRes] = await Promise.all([
+                    fetch(`${BASE_URL}/admin/settings`, {
+                        headers: { Authorization: `Bearer ${getToken()}` },
+                    }),
+                    fetch(`${BASE_URL}/admin/settings/admins`, {
+                        headers: { Authorization: `Bearer ${getToken()}` },
+                    }),
+                ]);
+
+                const settingsData = await settingsRes.json();
+                const adminsData = await adminsRes.json();
+
+                if (!settingsRes.ok) throw new Error(settingsData.message);
+                if (!adminsRes.ok) throw new Error(adminsData.message);
+
+                const s = settingsData.data;
+                setPlatform({
+                    commissionRate: s.commissionRate ?? 0,
+                    subscriptionFee: s.subscriptionFee ?? 0,
+                    featuredListingFee: s.featuredListingFee ?? 0,
+                });
+                setNotifications({
+                    newDisputeAlerts: s.newDisputeAlerts ?? false,
+                    newOfficeRegistrations: s.newOfficeRegistrations ?? false,
+                    dailyRevenueReport: s.dailyRevenueReport ?? false,
+                });
+
+                const tokenPayload = JSON.parse(
+                    atob(getToken()!.split(".")[1]),
+                );
+                const currentAdminId = tokenPayload.id || tokenPayload._id;
+
+                setAdmins(
+                    adminsData.data.map((a: any) => ({
+                        id: a._id,
+                        initials: (a.name || a.fullName || "?")
+                            .split(" ")
+                            .map((w: string) => w[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase(),
+                        name: a.name || a.fullName || "—",
+                        email: a.email,
+                        role: a.role,
+                        isYou: String(a._id) === String(currentAdminId),
+                    })),
+                );
+            } catch (err: any) {
+                setError(err.message || "Failed to load settings");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAll();
+    }, []);
+
+    // ── Save ──────────────────────────────────────────────────────────────────
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const response = await fetch(`${BASE_URL}/admin/settings`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                },
+                body: JSON.stringify({ ...platform, ...notifications }),
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            setToastVisible(true);
+            setTimeout(() => setToastVisible(false), 2500);
+        } catch (err: any) {
+            setError(err.message || "Failed to save settings");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // ── Remove admin ──────────────────────────────────────────────────────────
+    const handleRemoveAdmin = async (id: string) => {
+        setRemovingId(id);
+        try {
+            const response = await fetch(
+                `${BASE_URL}/admin/settings/admins/${id}`,
+                {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${getToken()}` },
+                },
+            );
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            setAdmins((prev) => prev.filter((a) => a.id !== id));
+        } catch (err: any) {
+            setError(err.message || "Failed to remove admin");
+        } finally {
+            setRemovingId(null);
+        }
+    };
 
     const toggleNotif = (k: keyof NotificationSettings) =>
         setNotifications((p) => ({ ...p, [k]: !p[k] }));
-    const removeAdmin = (id: string) =>
-        setAdmins((p) => p.filter((a) => a.id !== id));
-    const handleSave = async () => {
-        setSaving(true);
-        await new Promise((r) => setTimeout(r, 600));
-        setSaving(false);
-        setToastVisible(true);
-        setTimeout(() => setToastVisible(false), 2500);
-    };
+
+    // ── Loading ───────────────────────────────────────────────────────────────
+    if (loading) {
+        return (
+            <div className="w-full space-y-6">
+                <div className="flex items-center justify-between">
+                    <Skeleton className="h-8 w-40" />
+                    <Skeleton className="h-10 w-32" />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <Skeleton className="h-[260px]" />
+                    <Skeleton className="h-[260px]" />
+                    <Skeleton className="h-[180px]" />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>
             <div className="w-full space-y-6" dir={isRTL ? "rtl" : "ltr"}>
-                {/* ── Page title ──────────────────────────────────────────────── */}
+                {/* ── Page title ────────────────────────────────────────────── */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="font-['Syne',sans-serif] text-[20px] font-bold text-[var(--text-primary)]">
@@ -236,9 +346,16 @@ const Settings: React.FC = () => {
                     </button>
                 </div>
 
-                {/* ── Two-column grid on lg+ ────────────────────────────────── */}
+                {/* ── Error ─────────────────────────────────────────────────── */}
+                {error && (
+                    <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-[12.5px] text-red-500">
+                        {error}
+                    </div>
+                )}
+
+                {/* ── Grid ──────────────────────────────────────────────────── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* ── Platform ──────────────────────────────────────────────── */}
+                    {/* ── Platform ──────────────────────────────────────────── */}
                     <Card>
                         <SectionHeader
                             icon={Settings2}
@@ -297,7 +414,7 @@ const Settings: React.FC = () => {
                         />
                     </Card>
 
-                    {/* ── Notifications ─────────────────────────────────────────── */}
+                    {/* ── Notifications ─────────────────────────────────────── */}
                     <Card>
                         <SectionHeader
                             icon={Bell}
@@ -344,7 +461,7 @@ const Settings: React.FC = () => {
                         />
                     </Card>
 
-                    {/* ── Admin accounts ────────────────────────────────────────── */}
+                    {/* ── Admin accounts ────────────────────────────────────── */}
                     <Card>
                         <SectionHeader
                             icon={ShieldCheck}
@@ -378,9 +495,13 @@ const Settings: React.FC = () => {
                                     <Badge variant="blue">
                                         {t("settings.you")}
                                     </Badge>
+                                ) : removingId === admin.id ? (
+                                    <span className="w-4 h-4 rounded-full border-2 border-[var(--border-color)] border-t-red-500 animate-spin" />
                                 ) : (
                                     <button
-                                        onClick={() => removeAdmin(admin.id)}
+                                        onClick={() =>
+                                            handleRemoveAdmin(admin.id)
+                                        }
                                         title={t("settings.removeAdmin")}
                                         className="w-7 h-7 flex items-center justify-center rounded-lg
                       text-[var(--text-muted)] hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors flex-shrink-0"

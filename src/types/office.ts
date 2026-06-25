@@ -1,34 +1,22 @@
-export type OfficePlan = "basic" | "premium" | "featured";
-export type OfficeStatus = "active" | "pending" | "suspended";
+export type OfficeStatus = "active" | "suspended";
 
 export interface Office {
     id: string;
     initials: string;
     name: string;
-    city: string;
-    coverageArea: string;
-    plan: OfficePlan;
-    orders: number;
-    rating: number; // 1-5
-    status: OfficeStatus;
-    joinedAt: string;
     email: string;
     phone: string;
+    address: string | null;
+    status: OfficeStatus;
+    rating: number;
+    orders: number;
+    joinedAt: string;
 }
 
 export interface OfficesStats {
     total: number;
-    verified: number;
-    pendingReview: number;
+    active: number;
+    suspended: number;
     avgRating: number;
     monthTrend: number;
-}
-
-export interface AddOfficePayload {
-    name: string;
-    email: string;
-    phone: string;
-    city: string;
-    coverageArea: string;
-    plan: OfficePlan;
 }
