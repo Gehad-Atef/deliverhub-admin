@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
 import { authService } from "../../services/auth.service";
 import type { AuthState, LoginCredentials } from "../../types/auth";
 
@@ -27,6 +26,7 @@ export const login = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk("auth/logout", async () => {
+    localStorage.removeItem("token");
     localStorage.removeItem("admin");
 });
 
@@ -53,7 +53,7 @@ const authSlice = createSlice({
                     "admin",
                     JSON.stringify(action.payload.admin),
                 );
-                localStorage.setItem("token", action.payload.token); // ← ضيف الس طر ده
+                localStorage.setItem("token", action.payload.token);
             })
             .addCase(login.rejected, (state, action) => {
                 state.isLoading = false;
