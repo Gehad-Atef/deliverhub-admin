@@ -1,7 +1,7 @@
 import type { Driver } from "../types/driver";
 import type { User, UsersStats, UserStatus } from "../types/user";
 
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = "http://localhost:5000/api";
 
 const getToken = () => localStorage.getItem("token");
 

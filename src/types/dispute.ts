@@ -4,10 +4,12 @@ export type DisputePartyType = "customer" | "driver" | "office";
 export interface DisputeParty {
     name: string;
     type: DisputePartyType;
+    initials?: string;
 }
 
 export interface Dispute {
     id: string;
+    ticketNumber: string;
     orderId: string;
     title: string;
     description: string;
@@ -17,6 +19,10 @@ export interface Dispute {
     defendant: DisputeParty;
     createdAt: string;
     releaseLabel: string;
+    driverId: string | null;
+    shipmentId: string | null;
+    category: string;
+    resolvedAt: string | null;
 }
 
 export interface DisputesStats {
