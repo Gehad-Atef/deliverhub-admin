@@ -4,7 +4,7 @@ import { Avatar } from "../../components/ui/Avatar";
 import { Badge } from "../../components/ui/Badge";
 import { Bell, ShieldCheck, Settings2 } from "lucide-react";
 
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = "http://localhost:5000/api";
 const getToken = () => localStorage.getItem("token");
 
 // ─── Types ────────────────────────────────────────────────────────────────────

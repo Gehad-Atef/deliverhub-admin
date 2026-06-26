@@ -1,6 +1,6 @@
 import type { Office, OfficesStats, OfficeStatus } from "../types/office";
 
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = "http://localhost:5000/api";
 const getToken = () => localStorage.getItem("token");
 
 interface BackendOffice {

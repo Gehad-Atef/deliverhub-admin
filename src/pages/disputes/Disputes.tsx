@@ -3,15 +3,10 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
     fetchDisputes,
-    refundCustomer,
-    releaseToParty,
+    closeDispute,
     setFilter,
 } from "../../store/slices/disputesSlice";
-import type {
-    Dispute,
-    DisputePartyType,
-    DisputeStatus,
-} from "../../types/dispute";
+import type { DisputePartyType, DisputeStatus } from "../../types/dispute";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
 import { Spinner } from "../../components/ui/Spinner";
@@ -22,7 +17,6 @@ import {
     AlertTriangle,
     CircleCheck,
     Coins,
-    ArrowLeftRight,
     LockOpen,
     Smile,
     AlertCircle,
@@ -35,7 +29,7 @@ const statusBadge: Record<
     React.ComponentProps<typeof Badge>["variant"]
 > = {
     urgent: "red",
-    open: "amber",
+    open: "amber", // بيجي من الباك إند كـ open (اللي مش urgent)
     resolved: "green",
 };
 
@@ -52,19 +46,11 @@ const partyTypeKey: Record<DisputePartyType, string> = {
 };
 
 // ─── Dispute Card ─────────────────────────────────────────────────────────────
-interface DisputeCardProps {
-    dispute: Dispute;
+const DisputeCard: React.FC<{
+    dispute: import("../../types/dispute").Dispute;
     isActing: boolean;
-    onRefund: (id: string) => void;
-    onRelease: (id: string) => void;
-}
-
-const DisputeCard: React.FC<DisputeCardProps> = ({
-    dispute,
-    isActing,
-    onRefund,
-    onRelease,
-}) => {
+    onClose: (id: string) => void;
+}> = ({ dispute, isActing, onClose }) => {
     const { t } = useTranslation();
     const isResolved = dispute.status === "resolved";
     const isUrgent = dispute.status === "urgent";
@@ -75,9 +61,9 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
     const statusLabel =
         dispute.status === "urgent"
             ? t("disputes.urgent")
-            : dispute.status === "open"
-              ? t("disputes.open")
-              : t("disputes.resolved");
+            : dispute.status === "resolved"
+              ? t("disputes.resolved")
+              : t("disputes.sent"); // "open" من الباك إند = sent عند الكاستومر
 
     return (
         <div
@@ -124,9 +110,12 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
                 </span>
 
                 {/* Amount */}
-                <span className="text-[11px] text-[var(--text-muted)] opacity-60 ml-1">
-                    · ${dispute.amountAtRisk.toFixed(2)} {t("disputes.atRisk")}
-                </span>
+                {dispute.amountAtRisk > 0 && (
+                    <span className="text-[11px] text-[var(--text-muted)] opacity-60 ml-1">
+                        · ${dispute.amountAtRisk.toFixed(2)}{" "}
+                        {t("disputes.atRisk")}
+                    </span>
+                )}
 
                 {/* Actions */}
                 {!isResolved && (
@@ -134,22 +123,13 @@ const DisputeCard: React.FC<DisputeCardProps> = ({
                         {isActing ? (
                             <Spinner size="sm" />
                         ) : (
-                            <>
-                                <button
-                                    onClick={() => onRefund(dispute.id)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 hover:bg-red-500/20 transition-colors"
-                                >
-                                    <ArrowLeftRight size={12} />
-                                    {t("disputes.refundCustomer")}
-                                </button>
-                                <button
-                                    onClick={() => onRelease(dispute.id)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
-                                >
-                                    <LockOpen size={12} />
-                                    {dispute.releaseLabel}
-                                </button>
-                            </>
+                            <button
+                                onClick={() => onClose(dispute.id)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
+                            >
+                                <LockOpen size={12} />
+                                {t("disputes.closeTicket")}
+                            </button>
                         )}
                     </div>
                 )}
@@ -201,19 +181,27 @@ const Disputes: React.FC = () => {
         filter = "all",
     } = useAppSelector((s) => s.disputes) ?? {};
 
+    // جلب أول مرة
     useEffect(() => {
-        dispatch(fetchDisputes());
+        dispatch(fetchDisputes({ page: 1, limit: 20 }));
     }, [dispatch]);
 
+    // فلترة على الفرونت بدون reload
+    const handleFilter = (key: "all" | "urgent" | "resolved") => {
+        dispatch(setFilter(key));
+    };
+
     const filtered = useMemo(
-        () => disputes.filter((d) => filter === "all" || d.status === filter),
+        () =>
+            filter === "all"
+                ? disputes
+                : disputes.filter((d) => d.status === filter),
         [disputes, filter],
     );
 
     const filterTabs = [
         { key: "all" as const, label: t("disputes.all") },
         { key: "urgent" as const, label: t("disputes.urgent") },
-        { key: "open" as const, label: t("disputes.open") },
         { key: "resolved" as const, label: t("disputes.resolved") },
     ];
 
@@ -225,7 +213,9 @@ const Disputes: React.FC = () => {
                 <AlertCircle size={32} className="text-red-400" />
                 <p className="text-[var(--text-secondary)] text-sm">{error}</p>
                 <button
-                    onClick={() => dispatch(fetchDisputes())}
+                    onClick={() =>
+                        dispatch(fetchDisputes({ page: 1, limit: 20 }))
+                    }
                     className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
                 >
                     {t("disputes.retry")}
@@ -273,7 +263,7 @@ const Disputes: React.FC = () => {
                 {filterTabs.map(({ key, label }) => (
                     <button
                         key={key}
-                        onClick={() => dispatch(setFilter(key))}
+                        onClick={() => handleFilter(key)}
                         className={`
                             px-3 py-1.5 rounded-md text-[11.5px] transition-colors
                             ${
@@ -284,13 +274,9 @@ const Disputes: React.FC = () => {
                         `}
                     >
                         {label}
-                        {key !== "all" && key !== "resolved" && stats && (
-                            <span
-                                className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] ${key === "urgent" ? "bg-red-500/20 text-red-500 dark:text-red-400" : "bg-amber-500/20 text-amber-600 dark:text-amber-400"}`}
-                            >
-                                {key === "urgent"
-                                    ? stats.urgent
-                                    : stats.open - stats.urgent}
+                        {key === "urgent" && stats && (
+                            <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] bg-red-500/20 text-red-500 dark:text-red-400">
+                                {stats.urgent}
                             </span>
                         )}
                     </button>
@@ -315,8 +301,7 @@ const Disputes: React.FC = () => {
                             key={d.id}
                             dispute={d}
                             isActing={actionLoading === d.id}
-                            onRefund={(id) => dispatch(refundCustomer(id))}
-                            onRelease={(id) => dispatch(releaseToParty(id))}
+                            onClose={(id) => dispatch(closeDispute(id))}
                         />
                     ))}
                 </div>
