@@ -5,7 +5,7 @@ import { fetchDashboardData } from "../../store/slices/dashboardSlice";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
 import { Avatar } from "../../components/ui/Avatar";
-import { Package, Users, Bike, Coins, AlertCircle } from "lucide-react";
+import { Package, Users, AlertCircle, Coins } from "lucide-react";
 
 import type {
     RecentOrder,
@@ -210,11 +210,11 @@ const Dashboard: React.FC = () => {
             icon: Users,
         },
         {
-            label: t("drivers.onlineNow"),
-            value: stats.activeDrivers.toLocaleString(),
-            subText: `${stats.driversOnline} ${t("drivers.onlineNow").toLowerCase()}`,
-            trend: "neutral" as const,
-            icon: Bike,
+            label: t("disputes.title"),
+            value: `${stats.disputeRate}%`,
+            subText: `${stats.urgentDisputes} ${t("disputes.urgent")}`,
+            trend: stats.disputeRate > 5 ? "down" : ("neutral" as const),
+            icon: AlertCircle,
         },
         {
             label: t("revenue.totalRevenue"),
@@ -250,9 +250,6 @@ const Dashboard: React.FC = () => {
                         <span className="font-['Syne',sans-serif] text-[13px] font-semibold text-[var(--text-primary)]">
                             {t("shipments.title")}
                         </span>
-                        <button className="text-[11px] text-blue-500 hover:text-blue-400 transition-colors">
-                            {isRTL ? "← عرض الكل" : "See all →"}
-                        </button>
                     </div>
                     {recentOrders.map((o) => (
                         <OrderRow key={o.id} order={o} />
@@ -317,11 +314,6 @@ const Dashboard: React.FC = () => {
                     <span className="font-['Syne',sans-serif] text-[13px] font-semibold text-[var(--text-primary)]">
                         {t("users.title")}
                     </span>
-                    <button className="text-[11px] text-blue-500 hover:text-blue-400 transition-colors">
-                        {isRTL
-                            ? `← ${t("users.viewDetails")}`
-                            : `${t("users.viewDetails")} →`}
-                    </button>
                 </div>
 
                 <div className="overflow-x-auto">

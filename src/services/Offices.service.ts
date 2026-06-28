@@ -18,7 +18,6 @@ interface BackendOffice {
 
 interface GetOfficesResponse {
     offices: Office[];
-    stats: OfficesStats;
     pagination: {
         page: number;
         limit: number;
@@ -64,9 +63,21 @@ export const officesService = {
 
         return {
             offices: data.data.offices.map(mapOffice),
-            stats: data.data.stats,
             pagination: data.data.pagination,
         };
+    },
+
+    // مستقلة عن فلتر/بحث الجدول — بتتنادى مرة واحدة بس عند تحميل الصفحة
+    getStats: async (): Promise<OfficesStats> => {
+        const response = await fetch(`${BASE_URL}/admin/offices/stats`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        });
+
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data.message || "Failed to fetch office stats");
+
+        return data.data;
     },
 
     getOfficeById: async (id: string): Promise<Office> => {

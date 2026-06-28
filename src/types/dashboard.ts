@@ -41,8 +41,9 @@ export interface DashboardStats {
     totalOrdersTrend: number;
     registeredUsers: number;
     registeredUsersTrend: number;
-    activeDrivers: number;
-    driversOnline: number;
+    openDisputes: number;
+    urgentDisputes: number;
+    disputeRate: number;
     monthlyRevenue: number;
     revenueTrend: number;
 }

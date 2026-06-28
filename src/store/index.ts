@@ -9,25 +9,27 @@ import dashboardReducer from "./slices/dashboardSlice";
 import usersReducer from "./slices/usersSlice";
 import officesReducer from "./slices/officesSlice";
 import disputesReducer from "./slices/disputesSlice";
+import verificationReducer from "./slices/Verificationslice";
 import {
-  useDispatch,
-  useSelector,
-  type TypedUseSelectorHook,
+    useDispatch,
+    useSelector,
+    type TypedUseSelectorHook,
 } from "react-redux";
 
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    drivers: driversReducer,
-    shipments: shipmentsReducer,
-    revenue: revenueReducer,
-    escrow: escrowReducer,
-    dashboard: dashboardReducer,
-    users: usersReducer,
-    offices: officesReducer,
-    disputes: disputesReducer,
-    ui: uiReducer,
-  },
+    reducer: {
+        auth: authReducer,
+        drivers: driversReducer,
+        shipments: shipmentsReducer,
+        revenue: revenueReducer,
+        escrow: escrowReducer,
+        dashboard: dashboardReducer,
+        users: usersReducer,
+        offices: officesReducer,
+        disputes: disputesReducer,
+        verification: verificationReducer,
+        ui: uiReducer,
+    },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
