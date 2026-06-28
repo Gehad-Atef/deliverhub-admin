@@ -8,6 +8,7 @@ export default {
         page: "صفحة",
         of: "من",
         loading: "جار التحميل...",
+        all: "الكل",
     },
     users: {
         title: "المستخدمون",
@@ -88,8 +89,8 @@ export default {
         active: "نشط",
         inactive: "غير نشط",
         suspended: "موقوف",
-        pending: "قيد الانتظار", // ← جديد
-        banned: "محظور", // ← جديد
+        pending: "قيد الانتظار",
+        banned: "محظور",
         driver: "السائق",
         phone: "الهاتف",
         vehicle: "المركبة",
@@ -115,6 +116,7 @@ export default {
         dashboard: "الرئيسية",
         users: "المستخدمون",
         drivers: "السائقون",
+        verification: "التحقق",
         shipments: "الشحنات",
         offices: "المكاتب",
         revenue: "الإيرادات",
@@ -204,7 +206,6 @@ export default {
         resolvedMonth: "تم الحل (الشهر)",
         amountAtRisk: "المبلغ في خطر",
         urgent: "عاجل",
-        sent: "مفتوحة",
         avgResolveHours: "ساعة للحل",
         avgResolveHoursLabel: "متوسط",
         underReview: "قيد المراجعة",
@@ -214,11 +215,10 @@ export default {
         noDisputes: "لا توجد نزاعات في هذه الفئة",
         atRisk: "في خطر",
         vs: "ضد",
-        closeTicket: "إغلاق التذكرة",
+        refundCustomer: "استرداد للعميل",
         resolved_label: "تم الحل",
         retry: "إعادة المحاولة",
     },
-
     settings: {
         title: "الإعدادات",
         subtitle: "إدارة إعدادات وتفضيلات المنصة",
@@ -247,5 +247,20 @@ export default {
         moderator: "مشرف",
         you: "أنت",
         removeAdmin: "إزالة المسؤول",
+    },
+    verification: {
+        title: "التحقق",
+        pendingCount: "طلبات",
+        approve: "موافقة",
+        reject: "رفض",
+        noRequests: "لا توجد طلبات تحقق",
+        nationalId: "بطاقة الهوية",
+        drivingLicense: "رخصة القيادة",
+        vehicleLicense: "رخصة المركبة",
+        commercialRegister: "السجل التجاري",
+        pending: "معلق",
+        approved: "موافق عليه",
+        rejected: "مرفوض",
+        searchPlaceholder: "ابحث بالاسم أو البريد الإلكتروني...",
     },
 };

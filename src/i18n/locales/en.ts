@@ -8,6 +8,7 @@ export default {
         page: "Page",
         of: "of",
         loading: "Loading...",
+        all: "All",
     },
     users: {
         title: "Users",
@@ -88,8 +89,8 @@ export default {
         active: "Active",
         inactive: "Inactive",
         suspended: "Suspended",
-        pending: "Pending", // ← جديد
-        banned: "Banned", // ← جديد
+        pending: "Pending",
+        banned: "Banned",
         driver: "Driver",
         phone: "Phone",
         vehicle: "Vehicle",
@@ -115,6 +116,7 @@ export default {
         dashboard: "Dashboard",
         users: "Users",
         drivers: "Drivers",
+        verification: "Verification",
         shipments: "Shipments",
         offices: "Offices",
         revenue: "Revenue",
@@ -206,7 +208,6 @@ export default {
         resolvedMonth: "Resolved (month)",
         amountAtRisk: "Amount at risk",
         urgent: "urgent",
-        sent: "Open",
         avgResolveHours: "hrs to resolve",
         avgResolveHoursLabel: "Avg.",
         underReview: "Under review",
@@ -216,11 +217,10 @@ export default {
         noDisputes: "No disputes in this category",
         atRisk: "at risk",
         vs: "vs",
-        closeTicket: "Close ticket",
+        refundCustomer: "Refund customer",
         resolved_label: "Resolved",
         retry: "Retry",
     },
-
     settings: {
         title: "Settings",
         subtitle: "Manage platform configuration and preferences",
@@ -250,5 +250,20 @@ export default {
         moderator: "Moderator",
         you: "You",
         removeAdmin: "Remove admin",
+    },
+    verification: {
+        title: "Verification",
+        pendingCount: "requests",
+        approve: "Approve",
+        reject: "Reject",
+        noRequests: "No verification requests",
+        nationalId: "National ID",
+        drivingLicense: "Driving License",
+        vehicleLicense: "Vehicle License",
+        commercialRegister: "Commercial Register",
+        pending: "Pending",
+        approved: "Approved",
+        rejected: "Rejected",
+        searchPlaceholder: "Search by name or email…",
     },
 };

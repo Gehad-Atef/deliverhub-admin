@@ -12,52 +12,54 @@ import RevenuePage from "../pages/revenue/Revenue";
 import Disputes from "../pages/disputes/Disputes";
 import Settings from "../pages/settings/Settings";
 import EscrowPage from "../pages/escrow/Escrow";
+import Verification from "../pages/Verification/Verification";
 
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Navigate to="/login" replace />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/",
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <AdminLayout />,
+    {
+        path: "/",
+        element: <Navigate to="/login" replace />,
+    },
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    {
+        path: "/",
+        element: <ProtectedRoute />,
         children: [
-          {
-            path: "dashboard",
-            element: <Dashboard />,
-          },
-          { path: "users", element: <Users /> },
+            {
+                element: <AdminLayout />,
+                children: [
+                    {
+                        path: "dashboard",
+                        element: <Dashboard />,
+                    },
+                    { path: "users", element: <Users /> },
 
-          {
-            path: "drivers",
-            element: <DriversPage />,
-          },
+                    {
+                        path: "drivers",
+                        element: <DriversPage />,
+                    },
+                    { path: "verification", element: <Verification /> },
 
-          {
-            path: "shipments",
-            element: <ShipmentsPage />,
-          },
-          { path: "offices", element: <Offices /> },
-          { path: "disputes", element: <Disputes /> },
-          { path: "settings", element: <Settings /> },
-          {
-            path: "revenue",
-            element: <RevenuePage />,
-          },
+                    {
+                        path: "shipments",
+                        element: <ShipmentsPage />,
+                    },
+                    { path: "offices", element: <Offices /> },
+                    { path: "disputes", element: <Disputes /> },
+                    { path: "settings", element: <Settings /> },
+                    {
+                        path: "revenue",
+                        element: <RevenuePage />,
+                    },
 
-          {
-            path: "escrow",
-            element: <EscrowPage />,
-          },
+                    {
+                        path: "escrow",
+                        element: <EscrowPage />,
+                    },
+                ],
+            },
         ],
-      },
-    ],
-  },
+    },
 ]);

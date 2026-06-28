@@ -4,6 +4,8 @@ import type { Office, OfficesStats, OfficeStatus } from "../../types/office";
 import { officesService } from "../../services/Offices.service";
 
 // ─── Thunks ───────────────────────────────────────────────────────────────────
+
+// جلب جدول المكاتب بس (مفلتر/مبحوث) — سريعة، مش بتحسب stats
 export const fetchOffices = createAsyncThunk(
     "offices/fetchAll",
     async (
@@ -19,6 +21,20 @@ export const fetchOffices = createAsyncThunk(
             return await officesService.getOffices(params);
         } catch (err: any) {
             return rejectWithValue(err.message || "Failed to load offices");
+        }
+    },
+);
+
+// جلب الإحصائيات العامة بس — بتتنادى مرة واحدة عند فتح الصفحة، مش مع كل فلتر
+export const fetchOfficeStats = createAsyncThunk(
+    "offices/fetchStats",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await officesService.getStats();
+        } catch (err: any) {
+            return rejectWithValue(
+                err.message || "Failed to load office stats",
+            );
         }
     },
 );
@@ -54,6 +70,7 @@ interface OfficesState {
         pages: number;
     } | null;
     loading: boolean;
+    statsLoading: boolean;
     actionLoading: string | null;
     error: string | null;
     search: string;
@@ -65,6 +82,7 @@ const initialState: OfficesState = {
     stats: null,
     pagination: null,
     loading: false,
+    statsLoading: false,
     actionLoading: null,
     error: null,
     search: "",
@@ -90,7 +108,7 @@ const officesSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        // fetchOffices
+        // fetchOffices — الجدول بس، من غير stats
         builder
             .addCase(fetchOffices.pending, (state) => {
                 state.loading = true;
@@ -99,11 +117,24 @@ const officesSlice = createSlice({
             .addCase(fetchOffices.fulfilled, (state, action) => {
                 state.loading = false;
                 state.offices = action.payload.offices;
-                state.stats = action.payload.stats;
                 state.pagination = action.payload.pagination;
             })
             .addCase(fetchOffices.rejected, (state, action) => {
                 state.loading = false;
+                state.error = action.payload as string;
+            });
+
+        // fetchOfficeStats — مستقلة، بتتحدث لوحدها
+        builder
+            .addCase(fetchOfficeStats.pending, (state) => {
+                state.statsLoading = true;
+            })
+            .addCase(fetchOfficeStats.fulfilled, (state, action) => {
+                state.statsLoading = false;
+                state.stats = action.payload;
+            })
+            .addCase(fetchOfficeStats.rejected, (state, action) => {
+                state.statsLoading = false;
                 state.error = action.payload as string;
             });
 

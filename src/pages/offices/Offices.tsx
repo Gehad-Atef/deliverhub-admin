@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
     fetchOffices,
+    fetchOfficeStats,
     toggleOfficeStatus,
     setStatusFilter,
 } from "../../store/slices/officesSlice";
@@ -183,12 +184,14 @@ const Offices: React.FC = () => {
     const [viewOfficeId, setViewOfficeId] = useState<string | null>(null);
     const [localSearch, setLocalSearch] = useState("");
 
-    // جلب أول مرة
+    // جلب الجدول والـ stats أول مرة بس
+    // الـ stats منفصلة تمامًا، بتتنادى مرة واحدة هنا ولا تتكرر مع الفلترة
     useEffect(() => {
         dispatch(fetchOffices({ page: 1, limit: 20 }));
+        dispatch(fetchOfficeStats());
     }, [dispatch]);
 
-    // search مع debounce — بيبعت للباك إند
+    // search مع debounce — بيبعت للباك إند (الجدول بس، من غير stats)
     useEffect(() => {
         const id = setTimeout(() => {
             dispatch(
@@ -203,7 +206,7 @@ const Offices: React.FC = () => {
         return () => clearTimeout(id);
     }, [localSearch, dispatch]);
 
-    // status filter — بيبعت للباك إند فوراً
+    // status filter — بيبعت للباك إند فوراً (الجدول بس، من غير stats)
     const handleStatusFilter = (key: "all" | OfficeStatus) => {
         dispatch(setStatusFilter(key));
         dispatch(
