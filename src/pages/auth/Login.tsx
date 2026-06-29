@@ -192,49 +192,18 @@ const Login = () => {
           {/* Logo */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, #2563eb, #4f46e5)",
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12h12l1-12"
-                  />
-                </svg>
-              </div>
+              <img
+                src={
+                  isDark ? "/public/logo-dark.png" : "/public/logo-light.png"
+                }
+                className="w-20 h-10 shrink-0"
+                alt="طيار"
+              />
               <span
                 className="text-lg font-bold"
                 style={{ color: isDark ? "white" : "#0f172a" }}
-              >
-                DeliverHub
-              </span>
+              ></span>
             </div>
-
-            <h2
-              className="text-2xl font-bold mb-1"
-              style={{ color: isDark ? "white" : "#0f172a" }}
-            >
-              {t("auth.signIn")}
-            </h2>
-            <p
-              className="text-sm"
-              style={{
-                color: isDark ? "rgba(255,255,255,0.45)" : "rgba(15,23,42,0.5)",
-              }}
-            >
-              {t("auth.adminDashboard")}
-            </p>
           </div>
 
           {/* API Error */}
@@ -308,7 +277,7 @@ const Login = () => {
                     if (validationErrors.email)
                       setValidationErrors({ ...validationErrors, email: "" });
                   }}
-                  placeholder="admin@deliverhub.com"
+                  placeholder="admin@tayyar.com"
                   disabled={isLoading}
                   className={`w-full pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none transition-all
                     ${isLoading ? "opacity-50 cursor-not-allowed" : ""}

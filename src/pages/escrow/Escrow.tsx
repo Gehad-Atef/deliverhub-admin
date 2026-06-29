@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Shield, CheckCircle, RotateCcw, Clock } from "lucide-react";
+import {
+  Shield,
+  CheckCircle,
+  RotateCcw,
+  Clock,
+  X,
+  ShieldOff,
+} from "lucide-react";
 import {
   fetchEscrow,
   releaseEscrow,
@@ -75,7 +82,7 @@ const ConfirmModal: React.FC<{
             onClick={onClose}
             className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors"
           >
-            <i className="ti ti-x text-[16px]" />
+            <X size={16} />
           </button>
         </div>
 
@@ -250,10 +257,11 @@ const EscrowPage: React.FC = () => {
             <table className="w-full border-collapse text-[12.5px] min-w-[700px]">
               <thead>
                 <tr className="bg-[var(--bg-primary)]">
-                  {tableColumns.map((col) => (
+                  {tableColumns.map((col, idx) => (
                     <th
                       key={col}
-                      className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-[var(--text-muted)] border-b border-[var(--border-color)] uppercase tracking-[0.05em]`}
+                      className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-[var(--text-muted)] border-b border-[var(--border-color)] uppercase tracking-[0.05em]
+                      ${idx === tableColumns.length - 1 ? "sticky end-0 bg-[var(--bg-primary)] z-10" : ""}`}
                     >
                       {col}
                     </th>
@@ -275,7 +283,10 @@ const EscrowPage: React.FC = () => {
                       colSpan={7}
                       className="px-4 py-12 text-center text-[13px] text-[var(--text-muted)]"
                     >
-                      <i className="ti ti-shield-off text-[28px] block mb-2 mx-auto" />
+                      <ShieldOff
+                        size={28}
+                        className="block mb-2 mx-auto text-[var(--text-muted)]"
+                      />
                       No transactions found
                     </td>
                   </tr>
@@ -324,7 +335,7 @@ const EscrowPage: React.FC = () => {
                       </td>
 
                       {/* Actions */}
-                      <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
+                      <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] sticky end-0 bg-[var(--bg-secondary)] z-10">
                         {(transaction.status === "held" ||
                           transaction.status === "disputed") && (
                           <div className="flex items-center gap-2">
