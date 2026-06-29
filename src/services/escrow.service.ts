@@ -50,10 +50,10 @@ export const escrowService = {
         const t = data.data;
         const transaction: EscrowTransaction = {
             id: t._id,
-            shipmentId: t.shipment || "",
-            trackingNumber: t.trackingNumber || "N/A",
-            customerName: t.customer || "N/A",
-            driverName: t.driver || "N/A",
+            shipmentId: t.shipment?._id || t.shipment || "",
+            trackingNumber: t.shipment?.trackingNumber || "N/A",
+            customerName: t.customer?.fullName || "N/A",
+            driverName: t.driver?.fullName || "N/A",
             amount: t.amount,
             status: t.status,
             createdAt: t.createdAt,
@@ -76,10 +76,10 @@ export const escrowService = {
         const t = data.data;
         const transaction: EscrowTransaction = {
             id: t._id,
-            shipmentId: t.shipment || "",
-            trackingNumber: t.trackingNumber || "N/A",
-            customerName: t.customer || "N/A",
-            driverName: t.driver || "N/A",
+            shipmentId: t.shipment?._id || t.shipment || "",
+            trackingNumber: t.shipment?.trackingNumber || "N/A",
+            customerName: t.customer?.fullName || "N/A",
+            driverName: t.driver?.fullName || "N/A",
             amount: t.amount,
             status: t.status,
             createdAt: t.createdAt,

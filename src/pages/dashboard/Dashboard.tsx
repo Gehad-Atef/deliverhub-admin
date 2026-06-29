@@ -213,7 +213,7 @@ const Dashboard: React.FC = () => {
             label: t("disputes.title"),
             value: `${stats.disputeRate}%`,
             subText: `${stats.urgentDisputes} ${t("disputes.urgent")}`,
-            trend: stats.disputeRate > 5 ? "down" : ("neutral" as const),
+            trend: (stats.disputeRate > 5 ? "down" : "neutral") as "up" | "down" | "neutral",
             icon: AlertCircle,
         },
         {

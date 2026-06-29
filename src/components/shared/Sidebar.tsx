@@ -216,7 +216,7 @@ const navItems = [
 
 const Sidebar = () => {
     const { admin, logout } = useAuth();
-    const { language } = useUI();
+    useUI();
     const { t } = useTranslation();
 
     const [isOpen, setIsOpen] = useState(false);

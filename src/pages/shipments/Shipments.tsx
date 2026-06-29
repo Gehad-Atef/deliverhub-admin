@@ -114,7 +114,7 @@ const ManageShipmentModal: React.FC<{
                 .map((s) => (
                   <button
                     key={s}
-                    onClick={() => setNewStatus(s)}
+                    onClick={() => setNewStatus(s as any)}
                     className={`w-full py-2.5 rounded-lg text-[12.5px] font-medium border transition-colors
                     ${
                       newStatus === s

@@ -21,7 +21,9 @@ export interface Shipment {
   };
   status:
     | "pending"
+    | "pending_offers"
     | "assigned"
+    | "captain_assignment"
     | "picked_up"
     | "in_transit"
     | "delivered"
