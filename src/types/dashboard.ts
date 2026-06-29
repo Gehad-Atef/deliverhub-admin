@@ -30,7 +30,7 @@ export interface RecentUser {
     initials: string;
     name: string;
     email: string;
-    role: "customer" | "driver";
+    role: "customer" | "driver" | "office";
     orders: number;
     joined: string;
     status: "active" | "suspended";

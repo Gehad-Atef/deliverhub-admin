@@ -53,6 +53,7 @@ const userRoleMap: Record<
 > = {
     customer: "blue",
     driver: "amber",
+    office: "purple",
 };
 
 const BarRow: React.FC<{
@@ -97,6 +98,14 @@ const OrderRow: React.FC<{ order: RecentOrder }> = ({ order }) => {
 
 const UserRow: React.FC<{ user: RecentUser }> = ({ user }) => {
     const { t } = useTranslation();
+
+    const roleLabel =
+        user.role === "customer"
+            ? t("users.customer")
+            : user.role === "driver"
+              ? t("users.driver")
+              : t("offices.office");
+
     return (
         <tr className="group hover:bg-black/[0.02] dark:hover:bg-white/[0.025] transition-colors">
             <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] group-last:border-none">
@@ -113,11 +122,7 @@ const UserRow: React.FC<{ user: RecentUser }> = ({ user }) => {
                 </div>
             </td>
             <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] group-last:border-none">
-                <Badge variant={userRoleMap[user.role]}>
-                    {user.role === "customer"
-                        ? t("users.customer")
-                        : t("users.driver")}
-                </Badge>
+                <Badge variant={userRoleMap[user.role]}>{roleLabel}</Badge>
             </td>
             <td className="hidden sm:table-cell px-3.5 py-2.5 border-b border-[var(--border-color)] group-last:border-none text-[12.5px] text-[var(--text-secondary)]">
                 {user.orders}
@@ -308,7 +313,7 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* ── Recent users table ────────────────────────────────────────── */}
+            {/* ── Recent users table (customers + drivers + offices) ─────────── */}
             <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-[10px] overflow-hidden">
                 <div className="flex items-center justify-between px-[1.1rem] py-[0.85rem] border-b border-[var(--border-color)]">
                     <span className="font-['Syne',sans-serif] text-[13px] font-semibold text-[var(--text-primary)]">
