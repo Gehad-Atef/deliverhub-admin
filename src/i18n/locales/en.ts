@@ -73,6 +73,7 @@ export default {
         basic: "Basic",
         premium: "Premium",
         featured: "Featured",
+        address: "Address",
     },
     drivers: {
         title: "Drivers",
@@ -113,6 +114,13 @@ export default {
         copyright: "DeliverHub Admin",
     },
     sidebar: {
+        // categories
+        overview: "Overview",
+        people: "People",
+        operations: "Operations",
+        finance: "Finance",
+        system: "System",
+        // items
         dashboard: "Dashboard",
         users: "Users",
         drivers: "Drivers",

@@ -73,6 +73,7 @@ export default {
         basic: "أساسي",
         premium: "مميز",
         featured: "المميز",
+        address: "العنوان",
     },
     drivers: {
         title: "السائقون",
@@ -113,6 +114,13 @@ export default {
         copyright: "ديليفر هاب للإدارة",
     },
     sidebar: {
+        // categories
+        overview: "نظرة عامة",
+        people: "الأشخاص",
+        operations: "العمليات",
+        finance: "المالية",
+        system: "النظام",
+        // items
         dashboard: "الرئيسية",
         users: "المستخدمون",
         drivers: "السائقون",
