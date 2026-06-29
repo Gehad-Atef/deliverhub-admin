@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Package, TrendingUp, Truck, DollarSign } from "lucide-react";
+import {
+  Package,
+  TrendingUp,
+  Truck,
+  DollarSign,
+  Search,
+  X,
+  Settings,
+  PackageX,
+  ArrowLeft,
+} from "lucide-react";
 import {
   fetchShipments,
   updateShipmentStatus,
@@ -94,7 +104,7 @@ const ManageShipmentModal: React.FC<{
             onClick={onClose}
             className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors"
           >
-            <i className="ti ti-x text-[16px]" />
+            <X size={16} />
           </button>
         </div>
 
@@ -274,7 +284,10 @@ const ShipmentsPage: React.FC = () => {
               onSubmit={handleSearch}
               className="flex items-center gap-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg px-3 py-[6px] w-full sm:w-[240px]"
             >
-              <i className="ti ti-search text-[15px] text-[var(--text-muted)] flex-shrink-0" />
+              <Search
+                size={15}
+                className="text-[var(--text-muted)] flex-shrink-0"
+              />
               <input
                 type="text"
                 placeholder={t("shipments.searchPlaceholder")}
@@ -288,7 +301,7 @@ const ShipmentsPage: React.FC = () => {
                   onClick={() => setSearch("")}
                   className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
-                  <i className="ti ti-x text-[13px]" />
+                  <X size={13} />
                 </button>
               )}
             </form>
@@ -312,10 +325,11 @@ const ShipmentsPage: React.FC = () => {
             <table className="w-full border-collapse text-[12.5px] min-w-[800px]">
               <thead>
                 <tr className="bg-[var(--bg-primary)]">
-                  {tableColumns.map((col) => (
+                  {tableColumns.map((col, idx) => (
                     <th
                       key={col}
-                      className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-[var(--text-muted)] border-b border-[var(--border-color)] uppercase tracking-[0.05em]`}
+                      className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-[var(--text-muted)] border-b border-[var(--border-color)] uppercase tracking-[0.05em]
+                      ${idx === tableColumns.length - 1 ? "sticky end-0 bg-[var(--bg-primary)] z-10" : ""}`}
                     >
                       {col}
                     </th>
@@ -337,7 +351,10 @@ const ShipmentsPage: React.FC = () => {
                       colSpan={8}
                       className="px-4 py-12 text-center text-[13px] text-[var(--text-muted)]"
                     >
-                      <i className="ti ti-package-off text-[28px] block mb-2 mx-auto" />
+                      <PackageX
+                        size={28}
+                        className="block mb-2 mx-auto text-[var(--text-muted)]"
+                      />
                       {t("offices.noResults")}
                     </td>
                   </tr>
@@ -386,7 +403,10 @@ const ShipmentsPage: React.FC = () => {
                       <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                         <div className="flex items-center gap-1.5 text-[11.5px] text-[var(--text-secondary)]">
                           <span>{shipment.pickup.city || "—"}</span>
-                          <i className="ti ti-arrow-right text-[11px] text-[var(--text-muted)]" />
+                          <ArrowLeft
+                            size={11}
+                            className="text-[var(--text-muted)]"
+                          />
                           <span>{shipment.delivery.city || "—"}</span>
                         </div>
                       </td>
@@ -414,13 +434,13 @@ const ShipmentsPage: React.FC = () => {
                       </td>
 
                       {/* Actions */}
-                      <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
+                      <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] sticky end-0 bg-[var(--bg-secondary)] z-10">
                         <button
                           onClick={() => setSelectedShipment(shipment)}
                           className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors"
                           title={t("common.manage")}
                         >
-                          <i className="ti ti-settings text-[15px]" />
+                          <Settings size={15} />
                         </button>
                       </td>
                     </tr>
