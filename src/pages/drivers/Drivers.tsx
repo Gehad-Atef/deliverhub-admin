@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Users, Wifi, Star, Truck } from "lucide-react";
+import {
+  Users,
+  Wifi,
+  Star,
+  Truck,
+  Eye,
+  Ban,
+  RefreshCw,
+  X,
+  Check,
+} from "lucide-react";
 import {
   fetchDrivers,
   updateDriverStatus,
@@ -33,16 +43,15 @@ const vehicleIcons: Record<string, string> = {
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => (
   <div className="flex items-center gap-[2px]">
     {[1, 2, 3, 4, 5].map((star) => (
-      <i
+      <span
         key={star}
-        className="ti ti-star-filled text-[12px]"
+        className="text-[13px]"
         style={{
-          color:
-            star <= Math.round(rating)
-              ? "var(--amber, #f59e0b)"
-              : "var(--border-color)",
+          color: star <= Math.round(rating) ? "#f59e0b" : "var(--border-color)",
         }}
-      />
+      >
+        ★
+      </span>
     ))}
   </div>
 );
@@ -65,12 +74,11 @@ const DriversSkeleton = () => (
   </div>
 );
 
-const ManageDriverModal: React.FC<{
-  driver: Driver;
-  onAction: (id: string, status: "active" | "inactive" | "suspended") => void;
-  onClose: () => void;
-  actionLoading: boolean;
-}> = ({ driver, onAction, onClose, actionLoading }) => {
+// ─── View Driver Modal ────────────────────────────────────────────────────────
+const ViewDriverModal: React.FC<{ driver: Driver; onClose: () => void }> = ({
+  driver,
+  onClose,
+}) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
 
@@ -82,22 +90,24 @@ const ManageDriverModal: React.FC<{
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full sm:max-w-sm sm:mx-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl shadow-2xl">
+      <div className="w-full sm:max-w-sm sm:mx-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-black/20">
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-color)]">
           <h2 className="font-['Syne',sans-serif] text-[15px] font-semibold text-[var(--text-primary)]">
-            {t("drivers.manageDriver")}
+            {t("drivers.driverDetails")}
           </h2>
           <button
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] transition-colors"
           >
-            <i className="ti ti-x text-[16px]" />
+            <X size={15} />
           </button>
         </div>
 
+        {/* Body */}
         <div className="px-5 py-5">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-blue-600/15 border border-blue-500/25 flex items-center justify-center text-[14px] font-semibold text-blue-400">
+            <div className="w-12 h-12 rounded-xl bg-blue-600/15 border border-blue-500/25 flex items-center justify-center text-[15px] font-semibold text-blue-500 dark:text-blue-400">
               {driver.name.charAt(0)}
             </div>
             <div>
@@ -115,45 +125,43 @@ const ManageDriverModal: React.FC<{
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            {actionLoading ? (
-              <div className="flex justify-center py-4">
-                <Spinner size="md" />
+          <div className="border border-[var(--border-color)] rounded-xl overflow-hidden">
+            {[
+              { label: t("users.phone"), value: driver.phone },
+              {
+                label: t("drivers.vehicle"),
+                value: `${vehicleIcons[driver.vehicle.type] ?? "🚗"} ${driver.vehicle.plateNumber}`,
+              },
+              { label: t("drivers.deliveries"), value: driver.totalDeliveries },
+              { label: t("drivers.rating"), value: driver.rating },
+              {
+                label: t("users.joined"),
+                value: driver.joinedAt
+                  ? new Date(driver.joinedAt).toLocaleDateString()
+                  : "—",
+              },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] last:border-none"
+              >
+                <span className="text-[11.5px] text-[var(--text-muted)]">
+                  {label}
+                </span>
+                <span className="text-[12.5px] text-[var(--text-primary)]">
+                  {value}
+                </span>
               </div>
-            ) : (
-              <>
-                <button
-                  onClick={() => onAction(driver.id, "active")}
-                  disabled={driver.status === "active"}
-                  className="w-full py-2.5 rounded-lg text-[12.5px] font-medium border border-green-500/25 text-green-600 dark:text-green-400 hover:bg-green-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  {t("drivers.setActive")}
-                </button>
-                <button
-                  onClick={() => onAction(driver.id, "inactive")}
-                  disabled={driver.status === "inactive"}
-                  className="w-full py-2.5 rounded-lg text-[12.5px] font-medium border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  {t("drivers.setInactive")}
-                </button>
-                <button
-                  onClick={() => onAction(driver.id, "suspended")}
-                  disabled={driver.status === "suspended"}
-                  className="w-full py-2.5 rounded-lg text-[12.5px] font-medium border border-red-500/25 text-red-600 dark:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  {t("drivers.suspend")}
-                </button>
-              </>
-            )}
+            ))}
           </div>
         </div>
 
         <div className="px-5 pb-5">
           <button
             onClick={onClose}
-            className="w-full py-2 rounded-lg text-[12.5px] text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-primary)] hover:bg-[var(--bg-primary)] transition-colors"
+            className="w-full py-2 rounded-lg text-[12.5px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.09] transition-colors"
           >
-            {t("common.cancel")}
+            {t("users.close")}
           </button>
         </div>
       </div>
@@ -161,6 +169,7 @@ const ManageDriverModal: React.FC<{
   );
 };
 
+// ─── Main Page ────────────────────────────────────────────────────────────────
 const DriversPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { t, i18n } = useTranslation();
@@ -172,8 +181,8 @@ const DriversPage: React.FC = () => {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [viewDriver, setViewDriver] = useState<Driver | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchDrivers({ page, limit, search }));
@@ -184,14 +193,20 @@ const DriversPage: React.FC = () => {
     dispatch(fetchDrivers({ page: 1, limit, search }));
   };
 
-  const handleStatusChange = async (
-    id: string,
-    status: "active" | "inactive" | "suspended",
-  ) => {
-    setActionLoading(true);
-    await dispatch(updateDriverStatus({ id, status }));
-    setActionLoading(false);
-    setSelectedDriver(null);
+  const handleToggle = async (id: string, currentStatus: string) => {
+    let newStatus: "active" | "suspended" | "banned";
+
+    if (currentStatus === "active") {
+      newStatus = "suspended";
+    } else if (currentStatus === "suspended" || currentStatus === "pending") {
+      newStatus = "active";
+    } else {
+      return; // banned → مفيش action
+    }
+
+    setActionLoading(id);
+    await dispatch(updateDriverStatus({ id, status: newStatus }));
+    setActionLoading(null);
   };
 
   const statusTabs = [
@@ -360,11 +375,13 @@ const DriversPage: React.FC = () => {
                       Math.round((driver.totalDeliveries / 350) * 100),
                       100,
                     );
+                    const isActing = actionLoading === driver.id;
                     return (
                       <tr
                         key={driver.id}
-                        className="hover:bg-[var(--bg-primary)] transition-colors"
+                        className="group hover:bg-black/[0.02] dark:hover:bg-white/[0.025] transition-colors"
                       >
+                        {/* Driver */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                           <div className="flex items-center gap-2.5">
                             <div className="w-7 h-7 rounded-[6px] flex-shrink-0 flex items-center justify-center bg-[var(--bg-primary)] border border-[var(--border-color)] text-[10px] font-medium text-[var(--text-secondary)]">
@@ -380,9 +397,11 @@ const DriversPage: React.FC = () => {
                             </div>
                           </div>
                         </td>
+                        {/* Phone */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] text-[var(--text-secondary)]">
                           {driver.phone}
                         </td>
+                        {/* Vehicle */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                           <div className="flex items-center gap-1.5">
                             <span className="text-[14px]">
@@ -393,12 +412,15 @@ const DriversPage: React.FC = () => {
                             </span>
                           </div>
                         </td>
+                        {/* Rating */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                           <StarRating rating={driver.rating} />
                         </td>
+                        {/* Deliveries */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] text-[var(--text-secondary)]">
                           {driver.totalDeliveries}
                         </td>
+                        {/* Completion */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                           <div className="flex items-center gap-2">
                             <div className="w-20 h-1.5 bg-[var(--border-color)] rounded-full overflow-hidden">
@@ -412,19 +434,64 @@ const DriversPage: React.FC = () => {
                             </span>
                           </div>
                         </td>
+                        {/* Status */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
                           <Badge variant={statusBadge[driver.status] ?? "gray"}>
                             {t(`drivers.${driver.status}`)}
                           </Badge>
                         </td>
+                        {/* Actions */}
                         <td className="px-3.5 py-2.5 border-b border-[var(--border-color)]">
-                          <button
-                            onClick={() => setSelectedDriver(driver)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors"
-                            title={t("common.manage")}
-                          >
-                            <i className="ti ti-settings text-[15px]" />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            {/* View */}
+                            <button
+                              onClick={() => setViewDriver(driver)}
+                              title={t("users.viewDetails")}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] transition-colors"
+                            >
+                              <Eye size={15} />
+                            </button>
+
+                            {/* Toggle status */}
+                            {
+                              isActing ? (
+                                <Spinner size="sm" />
+                              ) : driver.status === "active" ? (
+                                // active → زرار إيقاف أحمر
+                                <button
+                                  onClick={() =>
+                                    handleToggle(driver.id, driver.status)
+                                  }
+                                  title={t("drivers.suspend")}
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                                >
+                                  <Ban size={15} />
+                                </button>
+                              ) : driver.status === "pending" ? (
+                                // pending → زرار قبول أخضر
+                                <button
+                                  onClick={() =>
+                                    handleToggle(driver.id, driver.status)
+                                  }
+                                  title={t("drivers.approve")}
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-green-500 hover:bg-green-500/10 transition-colors"
+                                >
+                                  <Check size={15} />
+                                </button>
+                              ) : driver.status === "suspended" ? (
+                                // suspended → زرار استعادة أخضر
+                                <button
+                                  onClick={() =>
+                                    handleToggle(driver.id, driver.status)
+                                  }
+                                  title={t("drivers.setActive")}
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-green-500 hover:bg-green-500/10 transition-colors"
+                                >
+                                  <RefreshCw size={15} />
+                                </button>
+                              ) : null /* banned → مفيش زرار */
+                            }
+                          </div>
                         </td>
                       </tr>
                     );
@@ -436,12 +503,11 @@ const DriversPage: React.FC = () => {
         </div>
       </div>
 
-      {selectedDriver && (
-        <ManageDriverModal
-          driver={selectedDriver}
-          onAction={handleStatusChange}
-          onClose={() => setSelectedDriver(null)}
-          actionLoading={actionLoading}
+      {/* View Modal */}
+      {viewDriver && (
+        <ViewDriverModal
+          driver={viewDriver}
+          onClose={() => setViewDriver(null)}
         />
       )}
     </>
