@@ -8,6 +8,7 @@ import {
   Clock,
   X,
   ShieldOff,
+  Eye,
 } from "lucide-react";
 import {
   fetchEscrow,
@@ -51,6 +52,70 @@ const EscrowSkeleton = () => (
     <Skeleton className="h-[380px]" />
   </div>
 );
+
+// ─── Detail Modal ─────────────────────────────────────────────────────────────
+const DetailModal: React.FC<{
+  transaction: EscrowTransaction;
+  onClose: () => void;
+}> = ({ transaction, onClose }) => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
+  const rows: [string, React.ReactNode][] = [
+    [t("escrow.trackingNumber"), transaction.trackingNumber],
+    [t("escrow.customer"), transaction.customerName],
+    [t("escrow.driver"), transaction.driverName],
+    [t("escrow.amount"), `EGP ${transaction.amount}`],
+    [t("escrow.status"), transaction.status],
+    [t("escrow.date"), new Date(transaction.createdAt).toLocaleString()],
+  ];
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+      dir={isRTL ? "rtl" : "ltr"}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full sm:max-w-sm sm:mx-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-t-2xl sm:rounded-2xl shadow-2xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-color)]">
+          <h2 className="font-['Syne',sans-serif] text-[15px] font-semibold text-[var(--text-primary)]">
+            {t("escrow.transactionDetails")}
+          </h2>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-3">
+          {rows.map(([label, value]) => (
+            <div key={label} className="flex items-center justify-between">
+              <span className="text-[12px] text-[var(--text-muted)]">
+                {label}
+              </span>
+              <span className="text-[12.5px] font-medium text-[var(--text-primary)]">
+                {value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-5 pb-5">
+          <button
+            onClick={onClose}
+            className="w-full py-2 rounded-lg text-[12.5px] text-[var(--text-muted)] hover:text-[var(--text-primary)] bg-[var(--bg-primary)] transition-colors"
+          >
+            {t("common.close")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ─── Confirm Modal ────────────────────────────────────────────────────────────
 const ConfirmModal: React.FC<{
@@ -147,6 +212,8 @@ const EscrowPage: React.FC = () => {
   const [confirmAction, setConfirmAction] = useState<
     "release" | "refund" | null
   >(null);
+  const [viewTransaction, setViewTransaction] =
+    useState<EscrowTransaction | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -334,34 +401,48 @@ const EscrowPage: React.FC = () => {
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </td>
 
-                      {/* Actions */}
+                      {/* Actions — always visible regardless of status */}
                       <td className="px-3.5 py-2.5 border-b border-[var(--border-color)] sticky end-0 bg-[var(--bg-secondary)] z-10">
-                        {(transaction.status === "held" ||
-                          transaction.status === "disputed") && (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => {
-                                setSelectedTransaction(transaction);
-                                setConfirmAction("release");
-                              }}
-                              className="text-[11.5px] font-medium text-green-600 dark:text-green-400 hover:underline transition"
-                            >
-                              {t("escrow.release")}
-                            </button>
-                            <span className="text-[var(--border-color)]">
-                              |
-                            </span>
-                            <button
-                              onClick={() => {
-                                setSelectedTransaction(transaction);
-                                setConfirmAction("refund");
-                              }}
-                              className="text-[11.5px] font-medium text-blue-500 hover:underline transition"
-                            >
-                              {t("escrow.refund")}
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setViewTransaction(transaction)}
+                            title={t("escrow.viewDetails")}
+                            className="w-7 h-7 flex items-center justify-center rounded-lg
+                              text-[var(--text-muted)] hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                          >
+                            <Eye size={15} />
+                          </button>
+
+                          {(transaction.status === "held" ||
+                            transaction.status === "disputed") && (
+                            <>
+                              <span className="text-[var(--border-color)]">
+                                |
+                              </span>
+                              <button
+                                onClick={() => {
+                                  setSelectedTransaction(transaction);
+                                  setConfirmAction("release");
+                                }}
+                                className="text-[11.5px] font-medium text-green-600 dark:text-green-400 hover:underline transition"
+                              >
+                                {t("escrow.release")}
+                              </button>
+                              <span className="text-[var(--border-color)]">
+                                |
+                              </span>
+                              <button
+                                onClick={() => {
+                                  setSelectedTransaction(transaction);
+                                  setConfirmAction("refund");
+                                }}
+                                className="text-[11.5px] font-medium text-blue-500 hover:underline transition"
+                              >
+                                {t("escrow.refund")}
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -371,6 +452,14 @@ const EscrowPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* View Modal */}
+      {viewTransaction && (
+        <DetailModal
+          transaction={viewTransaction}
+          onClose={() => setViewTransaction(null)}
+        />
+      )}
 
       {/* Confirm Modal */}
       {selectedTransaction && confirmAction && (
