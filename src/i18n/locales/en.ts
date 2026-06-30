@@ -9,6 +9,7 @@ export default {
     of: "of",
     loading: "Loading...",
     all: "All",
+    close: "Close",
   },
   users: {
     title: "Users",
@@ -209,6 +210,7 @@ export default {
     refundMessage:
       "Are you sure you want to refund this amount to the customer?",
     confirm: "Confirm",
+    transactionDetails: "Transaction Details",
   },
   disputes: {
     title: "Disputes",
@@ -228,6 +230,8 @@ export default {
     refundCustomer: "Refund customer",
     resolved_label: "Resolved",
     retry: "Retry",
+    sent: "Sent",
+    closeTicket: "Close Ticket",
   },
   settings: {
     title: "Settings",

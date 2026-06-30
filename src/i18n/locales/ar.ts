@@ -230,6 +230,8 @@ export default {
     refundCustomer: "استرداد للعميل",
     resolved_label: "تم الحل",
     retry: "إعادة المحاولة",
+    sent: "مُرسل",
+    closeTicket: "إغلاق التذكرة",
   },
   settings: {
     title: "الإعدادات",
