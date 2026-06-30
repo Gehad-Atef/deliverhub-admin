@@ -4,7 +4,7 @@ export interface Driver {
   email: string;
   phone: string;
   avatar?: string;
-  status: "active" | "inactive" | "suspended";
+  status: "active" | "inactive" | "suspended" | "pending" | "banned";
   vehicle: {
     type: "motorcycle" | "car" | "van" | "truck";
     plateNumber: string;

@@ -1,11 +1,14 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
     fetchDisputes,
     closeDispute,
     setFilter,
+    addLocalMessage,
 } from "../../store/slices/disputesSlice";
+import { disputesService } from "../../services/disputes.service";
+import { io } from "socket.io-client";
 import type { DisputePartyType, DisputeStatus } from "../../types/dispute";
 import { StatCard } from "../../components/shared/StatCard";
 import { Badge } from "../../components/ui/Badge";
@@ -20,6 +23,8 @@ import {
     LockOpen,
     Smile,
     AlertCircle,
+    MessageSquare,
+    Send,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -52,8 +57,13 @@ const DisputeCard: React.FC<{
     onClose: (id: string) => void;
 }> = ({ dispute, isActing, onClose }) => {
     const { t } = useTranslation();
+    const dispatch = useAppDispatch();
     const isResolved = dispute.status === "resolved";
     const isUrgent = dispute.status === "urgent";
+
+    const [expanded, setExpanded] = useState(false);
+    const [reply, setReply] = useState("");
+    const [submittingReply, setSubmittingReply] = useState(false);
 
     const PlaintiffIcon = partyIcon[dispute.plaintiff.type];
     const DefendantIcon = partyIcon[dispute.defendant.type];
@@ -118,29 +128,118 @@ const DisputeCard: React.FC<{
                 )}
 
                 {/* Actions */}
-                {!isResolved && (
-                    <div className="ml-auto flex items-center gap-2">
-                        {isActing ? (
-                            <Spinner size="sm" />
+                <div className="ml-auto flex items-center gap-2">
+                    <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-colors"
+                    >
+                        <MessageSquare size={12} />
+                        {expanded ? t("disputes.hideChat") : t("disputes.liveChat")}
+                    </button>
+                    
+                    {!isResolved && (
+                        <>
+                            {isActing ? (
+                                <Spinner size="sm" />
+                            ) : (
+                                <button
+                                    onClick={() => onClose(dispute.id)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
+                                >
+                                    <LockOpen size={12} />
+                                    {t("disputes.closeTicket")}
+                                </button>
+                            )}
+                        </>
+                    )}
+
+                    {isResolved && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-green-600 dark:text-green-400/70">
+                            <CircleCheck size={13} />
+                            {t("disputes.resolved_label")}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Expanded Live Chat Panel */}
+            {expanded && (
+                <div className="mt-4 pt-3 border-t border-[var(--border-color)]">
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 text-start">
+                        {t("disputes.liveChatHistory")}
+                    </h4>
+                    <div className="p-3 bg-black/10 dark:bg-black/20 rounded-lg border border-[var(--border-color)] max-h-60 overflow-y-auto flex flex-col gap-2.5 text-start">
+                        {dispute.messages && dispute.messages.length > 0 ? (
+                            dispute.messages.map((msg, i) => {
+                                const isUserSender = msg.sender === "user";
+                                return (
+                                    <div
+                                        key={i}
+                                        className={`flex flex-col max-w-[85%] ${
+                                            isUserSender ? "self-start items-start" : "self-end items-end"
+                                        }`}
+                                    >
+                                        <div className="text-[9px] text-[var(--text-muted)] px-1 mb-0.5 font-medium">
+                                            {msg.senderName}
+                                        </div>
+                                        <div
+                                            className={`px-3 py-1.5 rounded-xl text-[11.5px] leading-relaxed ${
+                                                isUserSender
+                                                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 rounded-tl-none border border-zinc-700/40"
+                                                    : "bg-blue-600 text-white rounded-tr-none"
+                                            }`}
+                                        >
+                                            {msg.text}
+                                        </div>
+                                        <span className="text-[8px] text-[var(--text-muted)] mt-0.5 px-1">
+                                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                        </span>
+                                    </div>
+                                );
+                            })
                         ) : (
-                            <button
-                                onClick={() => onClose(dispute.id)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
-                            >
-                                <LockOpen size={12} />
-                                {t("disputes.closeTicket")}
-                            </button>
+                            <div className="text-[11px] text-[var(--text-muted)] text-center py-4">
+                                {t("disputes.noMessages")}
+                            </div>
                         )}
                     </div>
-                )}
 
-                {isResolved && (
-                    <div className="ml-auto flex items-center gap-1.5 text-[11px] text-green-600 dark:text-green-400/70">
-                        <CircleCheck size={13} />
-                        {t("disputes.resolved_label")}
-                    </div>
-                )}
-            </div>
+                    {!isResolved && (
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                if (!reply.trim()) return;
+                                setSubmittingReply(true);
+                                try {
+                                    const newMsg = await disputesService.sendDisputeMessage(dispute.id, reply.trim());
+                                    dispatch(addLocalMessage({ ticketId: dispute.id, message: newMsg }));
+                                    setReply("");
+                                } catch (err) {
+                                    console.error("Failed to send reply:", err);
+                                } finally {
+                                    setSubmittingReply(false);
+                                }
+                            }}
+                            className="mt-3 flex gap-2"
+                        >
+                            <input
+                                type="text"
+                                value={reply}
+                                onChange={(e) => setReply(e.target.value)}
+                                placeholder={t("disputes.replyPlaceholder")}
+                                className="flex-1 bg-black/20 dark:bg-white/5 border border-[var(--border-color)] rounded-lg px-3 py-2 text-[11.5px] text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+                            />
+                            <button
+                                type="submit"
+                                disabled={submittingReply || !reply.trim()}
+                                className="p-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white transition-colors flex items-center justify-center"
+                            >
+                                <Send size={13} />
+                            </button>
+                        </form>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
@@ -185,6 +284,32 @@ const Disputes: React.FC = () => {
     useEffect(() => {
         dispatch(fetchDisputes({ page: 1, limit: 20 }));
     }, [dispatch]);
+
+    // Real-time socket updates for disputes chat
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token || !disputes.length) return;
+
+        const socket = io("http://localhost:3000", {
+            auth: { token },
+            transports: ["websocket"],
+        });
+
+        socket.on("connect", () => {
+            console.log("Admin connected to real-time disputes socket");
+        });
+
+        // Listen to live message events for each loaded dispute ticket
+        disputes.forEach((d) => {
+            socket.on(`ticket:${d.id}:message`, (message: any) => {
+                dispatch(addLocalMessage({ ticketId: d.id, message }));
+            });
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [disputes, dispatch]);
 
     // فلترة على الفرونت بدون reload
     const handleFilter = (key: "all" | "urgent" | "resolved") => {

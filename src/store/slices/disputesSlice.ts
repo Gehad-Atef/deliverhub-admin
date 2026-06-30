@@ -66,6 +66,21 @@ const disputesSlice = createSlice({
         clearError(state) {
             state.error = null;
         },
+        addLocalMessage(state, action: PayloadAction<{ ticketId: string; message: any }>) {
+            const dispute = state.disputes.find((d) => d.id === action.payload.ticketId);
+            if (dispute) {
+                if (!dispute.messages) dispute.messages = [];
+                const msg = action.payload.message;
+                if (!dispute.messages.some((m) => m.createdAt === msg.createdAt && m.text === msg.text)) {
+                    dispute.messages.push({
+                        sender: msg.sender,
+                        senderName: msg.senderName,
+                        text: msg.text,
+                        createdAt: msg.createdAt,
+                    });
+                }
+            }
+        },
     },
     extraReducers: (builder) => {
         // fetchDisputes
@@ -108,5 +123,5 @@ const disputesSlice = createSlice({
     },
 });
 
-export const { setFilter, clearError } = disputesSlice.actions;
+export const { setFilter, clearError, addLocalMessage } = disputesSlice.actions;
 export default disputesSlice.reducer;

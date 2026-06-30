@@ -211,7 +211,7 @@ export default {
         confirm: "Confirm",
     },
     disputes: {
-        title: "Disputes",
+        title: "Disputes & Support",
         openDisputes: "Open disputes",
         resolvedMonth: "Resolved (month)",
         amountAtRisk: "Amount at risk",
@@ -228,6 +228,12 @@ export default {
         refundCustomer: "Refund customer",
         resolved_label: "Resolved",
         retry: "Retry",
+        closeTicket: "Close Ticket",
+        hideChat: "Hide Chat",
+        liveChat: "Live Chat",
+        liveChatHistory: "Live Chat History",
+        noMessages: "No previous messages",
+        replyPlaceholder: "Type reply to user...",
     },
     settings: {
         title: "Settings",

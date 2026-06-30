@@ -209,7 +209,7 @@ export default {
         confirm: "تأكيد",
     },
     disputes: {
-        title: "النزاعات",
+        title: "النزاعات والدعم",
         openDisputes: "النزاعات المفتوحة",
         resolvedMonth: "تم الحل (الشهر)",
         amountAtRisk: "المبلغ في خطر",
@@ -226,6 +226,12 @@ export default {
         refundCustomer: "استرداد للعميل",
         resolved_label: "تم الحل",
         retry: "إعادة المحاولة",
+        closeTicket: "إغلاق التذكرة",
+        hideChat: "إخفاء الدردشة",
+        liveChat: "الدردشة المباشرة",
+        liveChatHistory: "سجل محادثة الدعم المباشر",
+        noMessages: "لا توجد رسائل سابقة",
+        replyPlaceholder: "اكتب رد المسؤول للعميل...",
     },
     settings: {
         title: "الإعدادات",

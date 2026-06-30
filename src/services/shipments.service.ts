@@ -35,10 +35,10 @@ export const shipmentsService = {
       },
       driver: s.captain
         ? {
-            id: s.captain._id,
-            name: s.captain.user?.fullName || "N/A",
-            phone: s.captain.user?.phone || "N/A",
-          }
+          id: s.captain._id,
+          name: s.captain.user?.fullName || "N/A",
+          phone: s.captain.user?.phone || "N/A",
+        }
         : undefined,
       pickup: {
         address: s.pickupAddress || "",
@@ -83,10 +83,10 @@ export const shipmentsService = {
       },
       driver: s.captain
         ? {
-            id: s.captain._id,
-            name: s.captain.user?.fullName || "N/A",
-            phone: s.captain.user?.phone || "N/A",
-          }
+          id: s.captain._id,
+          name: s.captain.user?.fullName || "N/A",
+          phone: s.captain.user?.phone || "N/A",
+        }
         : undefined,
       pickup: { address: s.pickupAddress || "", city: "" },
       delivery: { address: s.deliveryAddress || "", city: "" },

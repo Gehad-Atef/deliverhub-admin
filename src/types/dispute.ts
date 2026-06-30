@@ -7,6 +7,13 @@ export interface DisputeParty {
     initials?: string;
 }
 
+export interface DisputeMessage {
+    sender: "user" | "admin";
+    senderName: string;
+    text: string;
+    createdAt: string;
+}
+
 export interface Dispute {
     id: string;
     ticketNumber: string;
@@ -23,6 +30,7 @@ export interface Dispute {
     shipmentId: string | null;
     category: string;
     resolvedAt: string | null;
+    messages?: DisputeMessage[];
 }
 
 export interface DisputesStats {
