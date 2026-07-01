@@ -3,6 +3,34 @@ import type { Shipment } from "../types/shipment";
 const BASE_URL = "http://localhost:3000/api";
 const getToken = () => localStorage.getItem("token");
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+// السائق ممكن يرجع من الباك اند تحت اسم captain أو driver حسب الـ endpoint،
+// فبنتأكد من الاتنين بدل ما نفترض اسم واحد بس ونخلي العمود يفضل "غير معين" غلط.
+const mapDriver = (s: any): Shipment["driver"] => {
+  const raw = s.captain || s.driver;
+  if (!raw) return undefined;
+
+  const user = raw.user || raw;
+  const name = user?.fullName || user?.name;
+  const phone = user?.phone;
+
+  if (!name && !phone) return undefined;
+
+  return {
+    id: raw._id || raw.id || "",
+    name: name || "N/A",
+    phone: phone || "N/A",
+  };
+};
+
+// المدينة مش راجعة كـ field منفصل من الباك اند دلوقتي (مفيش غير عنوان كامل نصي)،
+// فبنجرب ناخد أول جزء من العنوان (قبل أول فاصلة) كتقريب للمدينة، ولو مفيش عنوان أصلاً بنسيب فاضي.
+const extractCity = (address: string): string => {
+  if (!address) return "";
+  const parts = address.split(",").map((p) => p.trim());
+  return parts[0] || "";
+};
+
 export const shipmentsService = {
   getShipments: async (params: {
     page?: number;
@@ -33,20 +61,14 @@ export const shipmentsService = {
         name: s.customer?.fullName || "N/A",
         phone: s.customer?.phone || "N/A",
       },
-      driver: s.captain
-        ? {
-            id: s.captain._id,
-            name: s.captain.user?.fullName || "N/A",
-            phone: s.captain.user?.phone || "N/A",
-          }
-        : undefined,
+      driver: mapDriver(s),
       pickup: {
         address: s.pickupAddress || "",
-        city: "",
+        city: extractCity(s.pickupAddress || ""),
       },
       delivery: {
         address: s.deliveryAddress || "",
-        city: "",
+        city: extractCity(s.deliveryAddress || ""),
       },
       status: s.status,
       price: s.estimatedPriceMin || 0,
@@ -81,15 +103,15 @@ export const shipmentsService = {
         name: s.customer?.fullName || "N/A",
         phone: s.customer?.phone || "N/A",
       },
-      driver: s.captain
-        ? {
-            id: s.captain._id,
-            name: s.captain.user?.fullName || "N/A",
-            phone: s.captain.user?.phone || "N/A",
-          }
-        : undefined,
-      pickup: { address: s.pickupAddress || "", city: "" },
-      delivery: { address: s.deliveryAddress || "", city: "" },
+      driver: mapDriver(s),
+      pickup: {
+        address: s.pickupAddress || "",
+        city: extractCity(s.pickupAddress || ""),
+      },
+      delivery: {
+        address: s.deliveryAddress || "",
+        city: extractCity(s.deliveryAddress || ""),
+      },
       status: s.status,
       price: s.estimatedPriceMin || 0,
       commission: 0,
