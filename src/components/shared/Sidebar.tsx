@@ -2,8 +2,10 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useUI } from "../../hooks/useUI";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../../store";
+import { fetchDisputes } from "../../store/slices/disputesSlice";
 
 const navGroups = [
   {
@@ -245,6 +247,25 @@ const Sidebar = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
+  const dispatch = useAppDispatch();
+  const { disputes = [] } = useAppSelector((s) => s.disputes) ?? {};
+
+  // Poll disputes globally every 15 seconds to update the notification dot in sidebar
+  useEffect(() => {
+    dispatch(fetchDisputes({ page: 1, limit: 20 })).catch(() => {});
+    const interval = setInterval(() => {
+      dispatch(fetchDisputes({ page: 1, limit: 20 })).catch(() => {});
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [dispatch]);
+
+  const hasAnyUnreadDispute = disputes.some((d) => {
+    if (d.status === "resolved") return false;
+    if (!d.messages || d.messages.length === 0) return false;
+    const lastMsg = d.messages[d.messages.length - 1];
+    return lastMsg.sender === "user";
+  });
+
   return (
     <>
       {/* Mobile Toggle */}
@@ -306,24 +327,35 @@ const Sidebar = () => {
 
               {/* Items */}
               <div className="flex flex-col gap-0.5">
-                {group.items.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition
-                                            ${
-                                              isActive
-                                                ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-                                                : "text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
-                                            }`
-                    }
-                  >
-                    {item.icon}
-                    {t(`sidebar.${item.key}`)}
-                  </NavLink>
-                ))}
+                {group.items.map((item) => {
+                  const showDot = item.key === "disputes" && hasAnyUnreadDispute;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition
+                                              ${
+                                                isActive
+                                                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+                                                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
+                                              }`
+                      }
+                    >
+                      <div className="flex items-center gap-3">
+                        {item.icon}
+                        {t(`sidebar.${item.key}`)}
+                      </div>
+                      {showDot && (
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                      )}
+                    </NavLink>
+                  );
+                })}
               </div>
             </div>
           ))}

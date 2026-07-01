@@ -29,6 +29,20 @@ export const closeDispute = createAsyncThunk(
     },
 );
 
+export const sendDisputeMessage = createAsyncThunk(
+    "disputes/sendMessage",
+    async (
+        { id, text }: { id: string; text: string },
+        { rejectWithValue }
+    ) => {
+        try {
+            return await disputesService.sendDisputeMessage(id, text);
+        } catch (err: any) {
+            return rejectWithValue(err.message || "Failed to send message");
+        }
+    }
+);
+
 // ─── State ────────────────────────────────────────────────────────────────────
 interface DisputesState {
     disputes: Dispute[];
@@ -104,6 +118,17 @@ const disputesSlice = createSlice({
             .addCase(closeDispute.rejected, (s, a) => {
                 s.actionLoading = null;
                 s.error = a.payload as string;
+            });
+
+        // sendDisputeMessage
+        builder
+            .addCase(sendDisputeMessage.fulfilled, (s, a) => {
+                const disputeId = a.meta.arg.id;
+                const d = s.disputes.find((x) => x.id === disputeId);
+                if (d) {
+                    if (!d.messages) d.messages = [];
+                    d.messages.push(a.payload);
+                }
             });
     },
 });
