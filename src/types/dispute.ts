@@ -23,6 +23,12 @@ export interface Dispute {
     shipmentId: string | null;
     category: string;
     resolvedAt: string | null;
+    messages?: {
+        sender: "user" | "admin";
+        senderName: string;
+        text: string;
+        createdAt: string;
+    }[];
 }
 
 export interface DisputesStats {

@@ -30,6 +30,7 @@ const mapDispute = (d: any): Dispute => ({
   shipmentId: d.shipmentId,
   category: d.category,
   resolvedAt: d.resolvedAt,
+  messages: d.messages || [],
 });
 
 export const disputesService = {
@@ -73,6 +74,26 @@ export const disputesService = {
     const data = await response.json();
     if (!response.ok)
       throw new Error(data.message || "Failed to resolve dispute");
+
+    return data.data;
+  },
+
+  sendDisputeMessage: async (
+    id: string,
+    text: string,
+  ): Promise<any> => {
+    const response = await fetch(`${BASE_URL}/admin/disputes/${id}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.message || "Failed to send message");
 
     return data.data;
   },
