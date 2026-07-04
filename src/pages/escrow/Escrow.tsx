@@ -288,14 +288,14 @@ const EscrowPage: React.FC = () => {
           <StatCard
             label={t("escrow.totalRefunded")}
             value={`EGP ${stats?.totalRefunded.toLocaleString() ?? 0}`}
-            subText="to customers"
+            subText={t("escrow.toCustomers")}
             trend="neutral"
             icon={RotateCcw}
           />
           <StatCard
             label={t("escrow.pendingCount")}
             value={stats?.pendingCount.toString() ?? "0"}
-            subText="awaiting release"
+            subText={t("escrow.awaitingRelease")}
             trend="neutral"
             icon={Clock}
           />
@@ -354,7 +354,7 @@ const EscrowPage: React.FC = () => {
                         size={28}
                         className="block mb-2 mx-auto text-[var(--text-muted)]"
                       />
-                      No transactions found
+                      {t("escrow.noTransactions")}
                     </td>
                   </tr>
                 ) : (

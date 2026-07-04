@@ -238,7 +238,7 @@ const Settings: React.FC = () => {
           })),
         );
       } catch (err: any) {
-        setError(err.message || "Failed to load settings");
+        setError(err.message || t("settings.loadError"));
       } finally {
         setLoading(false);
       }
@@ -267,7 +267,7 @@ const Settings: React.FC = () => {
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 2500);
     } catch (err: any) {
-      setError(err.message || "Failed to save settings");
+      setError(err.message || t("settings.saveError"));
     } finally {
       setSaving(false);
     }
@@ -288,7 +288,7 @@ const Settings: React.FC = () => {
 
       setAdmins((prev) => prev.filter((a) => a.id !== id));
     } catch (err: any) {
-      setError(err.message || "Failed to remove admin");
+      setError(err.message || t("settings.removeAdminError"));
     } finally {
       setRemovingId(null);
     }
