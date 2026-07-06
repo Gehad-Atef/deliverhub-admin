@@ -15,6 +15,7 @@ import {
 import {
   fetchShipments,
   updateShipmentStatus,
+  setPage,
 } from "../../store/slices/shipmentsSlice";
 import type { Shipment } from "../../types/shipment";
 import type { AppDispatch, RootState } from "../../store";
@@ -170,20 +171,49 @@ const ShipmentsPage: React.FC = () => {
     (state: RootState) => state.shipments,
   );
 
-  const [search, setSearch] = useState("");
+  const [localSearch, setLocalSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(
     null,
   );
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Debounce search input
   useEffect(() => {
-    dispatch(fetchShipments({ page, limit, search, status: statusFilter }));
-  }, [page, limit, statusFilter]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(localSearch);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [localSearch]);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    dispatch(setPage(1));
+  }, [debouncedSearch, dispatch]);
+
+  // Fetch shipments when page, limit, statusFilter, or debouncedSearch changes
+  useEffect(() => {
+    dispatch(
+      fetchShipments({
+        page,
+        limit,
+        search: debouncedSearch,
+        status: statusFilter,
+      }),
+    );
+  }, [page, limit, debouncedSearch, statusFilter, dispatch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(fetchShipments({ page: 1, limit, search, status: statusFilter }));
+    dispatch(
+      fetchShipments({
+        page: 1,
+        limit,
+        search: localSearch,
+        status: statusFilter,
+      }),
+    );
   };
 
   const handleUpdateStatus = async (id: string, status: string) => {
@@ -291,14 +321,14 @@ const ShipmentsPage: React.FC = () => {
               <input
                 type="text"
                 placeholder={t("shipments.searchPlaceholder")}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
                 className="bg-transparent border-none outline-none text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-full"
               />
-              {search && (
+              {localSearch && (
                 <button
                   type="button"
-                  onClick={() => setSearch("")}
+                  onClick={() => setLocalSearch("")}
                   className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <X size={13} />
@@ -472,7 +502,7 @@ const ShipmentsPage: React.FC = () => {
               <button
                 disabled={page === 1}
                 onClick={() =>
-                  dispatch({ type: "shipments/setPage", payload: page - 1 })
+                  dispatch(setPage(page - 1))
                 }
                 className="px-3 py-1.5 text-[12px] border border-[var(--border-color)] rounded-lg disabled:opacity-40 hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] transition-colors"
               >
@@ -481,7 +511,7 @@ const ShipmentsPage: React.FC = () => {
               <button
                 disabled={page === totalPages}
                 onClick={() =>
-                  dispatch({ type: "shipments/setPage", payload: page + 1 })
+                  dispatch(setPage(page + 1))
                 }
                 className="px-3 py-1.5 text-[12px] border border-[var(--border-color)] rounded-lg disabled:opacity-40 hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] transition-colors"
               >

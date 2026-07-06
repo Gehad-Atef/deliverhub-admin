@@ -125,8 +125,8 @@ export default {
     email: "البريد الإلكتروني",
     password: "كلمة المرور",
     signingIn: "جار تسجيل الدخول...",
-    adminDashboard: "لوحة تحكم الأدمن",
-    copyright: "ديليفر هاب للإدارة",
+    adminDashboard: "لوحة تحكم طيار",
+    copyright: "طيار للإدارة",
   },
 
   sidebar: {
@@ -198,6 +198,8 @@ export default {
     revenueBreakdown: "تفاصيل الإيرادات",
     transactionHistory: "سجل المعاملات",
     subscriptions: "الاشتراكات",
+    noData: "لا توجد بيانات إيرادات متاحة لهذه الفترة.",
+    noTransactions: "لا توجد معاملات مسجلة بعد.",
   },
   escrow: {
     title: "الضمان",

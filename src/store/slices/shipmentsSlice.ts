@@ -19,7 +19,6 @@ export const fetchShipments = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      // TODO: ربط الـ backend هنا
       const response = await shipmentsService.getShipments(params);
       return response;
     } catch (error: any) {
@@ -32,7 +31,6 @@ export const updateShipmentStatus = createAsyncThunk(
   "shipments/updateStatus",
   async (payload: { id: string; status: string }, { rejectWithValue }) => {
     try {
-      // TODO: ربط الـ backend هنا
       const response = await shipmentsService.updateShipmentStatus(
         payload.id,
         payload.status,

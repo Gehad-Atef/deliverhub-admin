@@ -126,7 +126,7 @@ export default {
     password: "Password",
     signingIn: "Signing in...",
     adminDashboard: "Tayyar Admin",
-    copyright: "DeliverHub Admin",
+    copyright: "Tayyar Admin",
   },
   sidebar: {
     // categories
@@ -196,6 +196,8 @@ export default {
     revenueBreakdown: "Revenue Breakdown",
     transactionHistory: "Transaction History",
     subscriptions: "Subscriptions",
+    noData: "No revenue data available for this period.",
+    noTransactions: "No transactions recorded yet.",
   },
   escrow: {
     title: "Escrow",

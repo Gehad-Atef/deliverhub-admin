@@ -303,8 +303,8 @@ const Sidebar = () => {
             <img
               src={
                 theme === "dark"
-                  ? "/public/logo-dark.png"
-                  : "/public/logo-light.png"
+                  ? "/logo-dark.png"
+                  : "/logo-light.png"
               }
               className="w-25 h-10"
               alt="طيار"
