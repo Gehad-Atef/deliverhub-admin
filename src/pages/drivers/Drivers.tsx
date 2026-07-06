@@ -15,6 +15,7 @@ import {
 import {
   fetchDrivers,
   updateDriverStatus,
+  setPage,
 } from "../../store/slices/driversSlice";
 import type { Driver } from "../../types/driver";
 import type { AppDispatch, RootState } from "../../store";
@@ -179,18 +180,33 @@ const DriversPage: React.FC = () => {
     (state: RootState) => state.drivers,
   );
 
-  const [search, setSearch] = useState("");
+  const [localSearch, setLocalSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewDriver, setViewDriver] = useState<Driver | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  // Debounce search input
   useEffect(() => {
-    dispatch(fetchDrivers({ page, limit, search }));
-  }, [page, limit]);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(localSearch);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [localSearch]);
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    dispatch(setPage(1));
+  }, [debouncedSearch, dispatch]);
+
+  // Fetch drivers when page, limit, or debouncedSearch changes
+  useEffect(() => {
+    dispatch(fetchDrivers({ page, limit, search: debouncedSearch }));
+  }, [page, limit, debouncedSearch, dispatch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(fetchDrivers({ page: 1, limit, search }));
+    dispatch(fetchDrivers({ page: 1, limit, search: localSearch }));
   };
 
   const handleToggle = async (id: string, currentStatus: string) => {
@@ -300,14 +316,14 @@ const DriversPage: React.FC = () => {
               <input
                 type="text"
                 placeholder={t("drivers.searchPlaceholder")}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
                 className="bg-transparent border-none outline-none text-[12.5px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-full"
               />
-              {search && (
+              {localSearch && (
                 <button
                   type="button"
-                  onClick={() => setSearch("")}
+                  onClick={() => setLocalSearch("")}
                   className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <i className="ti ti-x text-[13px]" />
@@ -500,6 +516,31 @@ const DriversPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {total > limit && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)]">
+              <span className="text-[11.5px] text-[var(--text-muted)]">
+                {t("users.page")} {page} / {Math.ceil(total / limit)}
+              </span>
+              <div className="flex gap-1.5">
+                <button
+                  disabled={page <= 1 || isLoading}
+                  onClick={() => dispatch(setPage(page - 1))}
+                  className="px-3 py-1.5 rounded-lg text-[11.5px] text-[var(--text-secondary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t("users.prev")}
+                </button>
+                <button
+                  disabled={page >= Math.ceil(total / limit) || isLoading}
+                  onClick={() => dispatch(setPage(page + 1))}
+                  className="px-3 py-1.5 rounded-lg text-[11.5px] text-[var(--text-secondary)] bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.07] dark:hover:bg-white/[0.08] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t("users.next")}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

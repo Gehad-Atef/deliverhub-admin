@@ -161,7 +161,7 @@ const RevenuePage: React.FC = () => {
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-[var(--text-muted)]">
                 <i className="ti ti-chart-bar-off text-[28px] mb-2" />
-                <p className="text-[13px]">No data available</p>
+                <p className="text-[13px]">{t("revenue.noData")}</p>
               </div>
             )}
 
@@ -205,7 +205,7 @@ const RevenuePage: React.FC = () => {
                     <tr>
                       <td colSpan={6} className="px-4 py-12 text-center text-[13px] text-[var(--text-muted)]">
                         <i className="ti ti-receipt-off text-[28px] block mb-2 mx-auto" />
-                        No transactions yet
+                        {t("revenue.noTransactions")}
                       </td>
                     </tr>
                   ) : (

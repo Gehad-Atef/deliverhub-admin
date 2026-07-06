@@ -14,7 +14,6 @@ export const fetchEscrow = createAsyncThunk(
   "escrow/fetchAll",
   async (status: string, { rejectWithValue }) => {
     try {
-      // TODO: ربط الـ backend هنا
       const response = await escrowService.getTransactions(status);
       return response;
     } catch (error: any) {
@@ -27,7 +26,6 @@ export const releaseEscrow = createAsyncThunk(
   "escrow/release",
   async (id: string, { rejectWithValue }) => {
     try {
-      // TODO: ربط الـ backend هنا
       const response = await escrowService.releaseTransaction(id);
       return response;
     } catch (error: any) {
@@ -40,7 +38,6 @@ export const refundEscrow = createAsyncThunk(
   "escrow/refund",
   async (id: string, { rejectWithValue }) => {
     try {
-      // TODO: ربط الـ backend هنا
       const response = await escrowService.refundTransaction(id);
       return response;
     } catch (error: any) {

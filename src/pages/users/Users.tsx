@@ -144,7 +144,8 @@ const UsersSkeleton = () => (
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const Users: React.FC = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === "ar";
     const dispatch = useAppDispatch();
     const { users, stats, pagination, loading, actionLoading, error } =
         useAppSelector((s) => s.users);
@@ -189,7 +190,7 @@ const Users: React.FC = () => {
 
     return (
         <>
-            <div className="space-y-3">
+            <div className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
                 {/* ── Title ─────────────────────────────────────────────── */}
                 <div className="flex items-baseline gap-2">
                     <h1 className="font-['Syne',sans-serif] text-[18px] font-bold text-[var(--text-primary)]">
@@ -297,7 +298,7 @@ const Users: React.FC = () => {
                                     ].map((col) => (
                                         <th
                                             key={col}
-                                            className="px-3.5 py-2.5 text-left text-[10.5px] font-medium text-[var(--text-muted)] border-b border-[var(--border-color)] uppercase tracking-[0.05em]"
+                                            className={`px-3.5 py-2.5 text-${isRTL ? "right" : "left"} text-[10.5px] font-medium text-[var(--text-muted)] border-b border-[var(--border-color)] uppercase tracking-[0.05em]`}
                                         >
                                             {col}
                                         </th>

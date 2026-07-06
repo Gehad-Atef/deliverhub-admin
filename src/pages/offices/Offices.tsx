@@ -248,7 +248,7 @@ const Offices: React.FC = () => {
                     }
                     className="mt-1 px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 text-white transition-colors"
                 >
-                    Retry
+                    {t("common.retry")}
                 </button>
             </div>
         );

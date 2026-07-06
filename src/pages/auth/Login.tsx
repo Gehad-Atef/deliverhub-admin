@@ -194,7 +194,7 @@ const Login = () => {
             <div className="flex items-center gap-3 mb-6">
               <img
                 src={
-                  isDark ? "/public/logo-dark.png" : "/public/logo-light.png"
+                  isDark ? "/logo-dark.png" : "/logo-light.png"
                 }
                 className="w-20 h-10 shrink-0"
                 alt="طيار"

@@ -253,7 +253,13 @@ const Verification: React.FC = () => {
                     {t("verification.title")}
                 </h1>
                 <span className="text-[13px] text-[var(--text-muted)]">
-                    — {filtered.length} {t("verification.pendingCount")}
+                    — {filtered.length} {
+                        filter === "pending"
+                            ? t("verification.pendingCount")
+                            : filter === "all"
+                                ? t("common.all").toLowerCase()
+                                : t(`verification.${filter}`).toLowerCase()
+                    }
                 </span>
             </div>
 

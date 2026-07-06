@@ -15,7 +15,6 @@ export const fetchRevenue = createAsyncThunk(
   "revenue/fetchAll",
   async (period: "today" | "week" | "month" | "year", { rejectWithValue }) => {
     try {
-      // TODO: ربط الـ backend هنا
       const response = await revenueService.getRevenue(period);
       return response;
     } catch (error: any) {
